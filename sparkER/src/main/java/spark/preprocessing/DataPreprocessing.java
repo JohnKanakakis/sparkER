@@ -106,6 +106,14 @@ public class DataPreprocessing {
 			partitions = Integer.parseInt(args[4]);
 		}
 		
+		int chooseKb = Integer.parseInt(args[5]);
+		
+		
+		Broadcast<byte[]> kb;
+		if(chooseKb == 1){
+			kb = skb;
+		}else
+			kb = tkb;
 		
 		
 		JavaPairRDD<LongWritable, Text> data = ctx
@@ -163,6 +171,7 @@ public class DataPreprocessing {
 		
 		
 		
+		
 		/*data = data.map(new Function<String,String>(){
 
 			*//**
@@ -177,7 +186,7 @@ public class DataPreprocessing {
 			}
 			
 		});*/
-		JavaPairRDD<String, Tuple2<String, String>> triplesRDD = DataParser.run(data,partitions,skb);
+		JavaPairRDD<String, Tuple2<String, String>> triplesRDD = DataParser.run(data,partitions,kb);
 		
 		
 		//triplesRDD = DataFilter.filterByLIMESConfiguration(triplesRDD, skb);

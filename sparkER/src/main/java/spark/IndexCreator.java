@@ -123,7 +123,7 @@ public class IndexCreator {
 						//object = DataFormatter.eliminateDataTypeFromLiteral(r_info.get(i+1));
 						//object = object.replace("\"", "");
 						if(kbProperties.contains(predicate)){
-							object = Utils.eliminateDataTypeFromLiteral(r_info.get(i+1));
+							object = SparkUtils.eliminateDataTypeFromLiteral(r_info.get(i+1));
 							BKV+=(object.replace("\"", "")+" ");
 						}
 					}

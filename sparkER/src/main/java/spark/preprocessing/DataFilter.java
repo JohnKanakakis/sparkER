@@ -187,102 +187,37 @@ public class DataFilter {
 	 * the entities (type class, properties etc) involved in the linking task 
 	 * @return the filtered data in the form of (r_id, [info]) 
 	 */
-	public static JavaPairRDD<String, Tuple2<String, String>> filterByLIMESConfiguration(
-			JavaPairRDD<String, Tuple2<String, String>> triplesRDD, 
+	public static JavaPairRDD<String, Set<Tuple2<String, String>>> ensureLIMESConfiguration(
+			JavaPairRDD<String, Set<Tuple2<String, String>>> entitiesRDD, 
 			final Broadcast<byte[]> kbB) {
 		
 		final KBInfo kb = (KBInfo)HDFSUtils.deserialize(kbB.getValue());
 		
-		final HashSet<String> configProperties = new HashSet<String>(kb.getProperties());
-		configProperties.add(TYPE_PROPERTY.toString());
 		
-		/*System.out.println(configProperties);
-		System.exit(0);*/
-		JavaPairRDD<String, Tuple2<String, String>> triplesRDD_1 = filterByEntityProperties(triplesRDD,configProperties);
-		
-		triplesRDD_1 = triplesRDD_1.mapToPair(new PairFunction<Tuple2<String, Tuple2<String, String>>,String, Tuple2<String, String>>(){
+		entitiesRDD = entitiesRDD.filter(new Function<Tuple2<String, Set<Tuple2<String, String>>>,Boolean>(){
 
 			private static final long serialVersionUID = 1L;
 
-			private String changeDOI(String line){
-				String DOI;
-				//String line = "10.4404/hystrix 7.1 2 4074 ";
-				line = line.trim();
-		       
-				//Decode DOI strings before applying the regex
-				String result = "";
-				try {
-					result = java.net.URLDecoder.decode(line, "UTF-8");
-				} catch (UnsupportedEncodingException | java.lang.IllegalArgumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					return null;
-				}
-		       
-				//Pattern for DOI
-//			       String pattern="10.\\d{4}/\\d{3}/.*";
-				//String pattern="10.\\d{4}/.*";
-				String pattern = "10.\\d{4}/.+(=?).+?(?=[0-9])";
-				
-				// Create a Pattern object
-				Pattern r = Pattern.compile(pattern);
-
-				// Create matcher object.
-				Matcher m = r.matcher(result);
-				if (m.find( )) {
-		          System.out.println("Found value1: " + m.group() );
-		          DOI = m.group();
-		          
-		          //cleaning openAIRE's DOIs which have stripped from dashes
-		          if(DOI.contains(" ")){
-		           DOI= DOI.replaceAll(" ","-");
-		           //System.out.println("DOI is: " +DOI );
-		           
-		          }
-		          
-		          return DOI;
-		      	}else {
-		          //Handle No matches here
-		      		return null;
-		      	}
-			}
 			@Override
-			public Tuple2<String, Tuple2<String, String>> call(Tuple2<String, Tuple2<String, String>> t) throws Exception {
+			public Boolean call(Tuple2<String, Set<Tuple2<String, String>>> entity)
+					throws Exception {
 				
-				String property = t._2._1;
+				Set<Tuple2<String, String>> poPairs = entity._2;
 				
-				
-				if(property.equals("http://purl.org/dc/terms/identifier") || 
-						property.equals("http://purl.org/dc/elements/1.1/identifier")){
-					String DOI = t._2._2;
-					DOI = DOI.replace("\"", "");
-					String new_DOI = changeDOI(DOI);
-					
-					if(new_DOI == null){
-						return new Tuple2<String, Tuple2<String, String>>("",new Tuple2<String,String>("",""));
+				for(Tuple2<String, String> po : poPairs){
+					String property = po._1;
+					String object = po._2;
+					if (property.equals(TYPE_PROPERTY)
+							&& object.equals(kb.getClassRestriction())) {
+						//System.out.println("entity class filtering "+property +" "+object);
+						return true;
 					}
-					
-					new_DOI = "\""+new_DOI+"\"";
-					
-					Tuple2<String, Tuple2<String, String>> new_t = 
-							new Tuple2<String, Tuple2<String, String>>(t._1,new Tuple2<String,String>(property,new_DOI));
-					
-					return new_t;
-				}else{
-					
-					return t;
 				}
-				
-				
-				
-				
+				return false;
 			}
 			
 		});
-		
-		JavaPairRDD<String, Tuple2<String, String>> triplesRDD_2 = filterByEntityClass(triplesRDD,kb.getClassRestriction());
-		
-		return triplesRDD_1.union(triplesRDD_2);
+		return entitiesRDD;
 		
 	}
 
@@ -293,3 +228,90 @@ public class DataFilter {
 }
 
 
+/*System.out.println(configProperties);
+System.exit(0);
+JavaPairRDD<String, Tuple2<String, String>> triplesRDD_1 = filterByEntityProperties(triplesRDD,configProperties);
+
+triplesRDD_1 = triplesRDD_1.mapToPair(new PairFunction<Tuple2<String, Tuple2<String, String>>,String, Tuple2<String, String>>(){
+
+	private static final long serialVersionUID = 1L;
+
+	private String changeDOI(String line){
+		String DOI;
+		//String line = "10.4404/hystrix 7.1 2 4074 ";
+		line = line.trim();
+       
+		//Decode DOI strings before applying the regex
+		String result = "";
+		try {
+			result = java.net.URLDecoder.decode(line, "UTF-8");
+		} catch (UnsupportedEncodingException | java.lang.IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+       
+		//Pattern for DOI
+//	       String pattern="10.\\d{4}/\\d{3}/.*";
+		//String pattern="10.\\d{4}/.*";
+		String pattern = "10.\\d{4}/.+(=?).+?(?=[0-9])";
+		
+		// Create a Pattern object
+		Pattern r = Pattern.compile(pattern);
+
+		// Create matcher object.
+		Matcher m = r.matcher(result);
+		if (m.find( )) {
+          System.out.println("Found value1: " + m.group() );
+          DOI = m.group();
+          
+          //cleaning openAIRE's DOIs which have stripped from dashes
+          if(DOI.contains(" ")){
+           DOI= DOI.replaceAll(" ","-");
+           //System.out.println("DOI is: " +DOI );
+           
+          }
+          
+          return DOI;
+      	}else {
+          //Handle No matches here
+      		return null;
+      	}
+	}
+	@Override
+	public Tuple2<String, Tuple2<String, String>> call(Tuple2<String, Tuple2<String, String>> t) throws Exception {
+		
+		String property = t._2._1;
+		
+		
+		if(property.equals("http://purl.org/dc/terms/identifier") || 
+				property.equals("http://purl.org/dc/elements/1.1/identifier")){
+			String DOI = t._2._2;
+			DOI = DOI.replace("\"", "");
+			String new_DOI = changeDOI(DOI);
+			
+			if(new_DOI == null){
+				return new Tuple2<String, Tuple2<String, String>>("",new Tuple2<String,String>("",""));
+			}
+			
+			new_DOI = "\""+new_DOI+"\"";
+			
+			Tuple2<String, Tuple2<String, String>> new_t = 
+					new Tuple2<String, Tuple2<String, String>>(t._1,new Tuple2<String,String>(property,new_DOI));
+			
+			return new_t;
+		}else{
+			
+			return t;
+		}
+		
+		
+		
+		
+	}
+	
+});
+
+JavaPairRDD<String, Tuple2<String, String>> triplesRDD_2 = filterByEntityClass(triplesRDD,kb.getClassRestriction());
+
+return triplesRDD_1.union(triplesRDD_2);*/

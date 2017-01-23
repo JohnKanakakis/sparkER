@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import scala.Tuple2;
 import spark.HDFSUtils;
+import spark.SparkUtils;
 
 public class DataParser {
 
@@ -137,6 +138,7 @@ public class DataParser {
 			    					String property = triple.get(1);
 			    					String object = triple.get(2);
 			    					
+			    					object = SparkUtils.eliminateDataTypeFromLiteral(object);
 			    					
 			    					if(DataFilter.containedInXMLConfiguration(property,object,kb)){
 			    						

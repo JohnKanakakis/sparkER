@@ -190,7 +190,7 @@ public class Linker {
 	    		predicate = resourceInfo.get(i);
 	    		
 	    		if(kb.getProperties().contains(predicate)){
-	    			object = Utils.eliminateDataTypeFromLiteral(resourceInfo.get(i+1));
+	    			object = SparkUtils.eliminateDataTypeFromLiteral(resourceInfo.get(i+1));
 		    		if(kb.getFunctions().get(predicate).keySet().size() == 0){
 		    			
 						cache.addTriple(subject, predicate, object);
