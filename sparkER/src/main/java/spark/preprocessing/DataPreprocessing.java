@@ -194,7 +194,7 @@ public class DataPreprocessing {
 		JavaPairRDD<String, Set<Tuple2<String, String>>> entitiesRDD = 
 				DataAggregatorByEntity.run(triplesRDD,partitions);
 
-		
+		entitiesRDD = DataFilter.ensureLIMESConfiguration(entitiesRDD, kb);
 		
 		DataWriterNTriples.saveEntities(entitiesRDD, outputDirectory);
 		
