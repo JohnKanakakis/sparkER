@@ -76,6 +76,8 @@ public class DataPreprocessing {
 		InputStream configFile = HDFSUtils.getHDFSFile(args[0]);
 		InputStream dtdFile = HDFSUtils.getHDFSFile(args[1]);
 
+		
+		
 		XMLConfigurationReader reader = new XMLConfigurationReader();
 		org.aksw.limes.core.io.config.Configuration config = reader.validateAndRead(configFile,dtdFile);
 
@@ -116,6 +118,7 @@ public class DataPreprocessing {
 			kb = tkb;
 		
 		
+		
 		JavaPairRDD<LongWritable, Text> data = ctx
 		        .newAPIHadoopFile(inputDirectory, 
 		        				  TextInputFormat.class, 
@@ -124,68 +127,7 @@ public class DataPreprocessing {
 		        				  hdfsConf);
 		
 		
-		//DataFilter.kbB = skb;
 		
-		/*JavaPairRDD<String, PortableDataStream> binData = ctx.binaryFiles(inputDirectory);
-		
-		
-		JavaRDD<ByteArrayOutputStream> data = binData.map(new Function<Tuple2<String,PortableDataStream>,ByteArrayOutputStream>(){
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public ByteArrayOutputStream call(Tuple2<String, PortableDataStream> file)
-					throws Exception {
-				
-				DataInputStream stream = file._2.open();
-				
-				GZIPInputStream gzis = new GZIPInputStream(stream);
-				
-				byte[] buffer = new byte[1024];
-				ByteArrayOutputStream out = new ByteArrayOutputStream(Integer.MAX_VALUE);
-
-		        int len;
-		        while ((len = gzis.read(buffer)) > 0) {
-		        	out.write(buffer, 0, len);
-		        }
-
-		        gzis.close();
-		    	out.close();
-				
-		    	InputStream input = new ByteArrayInputStream(out.toByteArray());
-				InputStreamReader reader = new InputStreamReader(input);
-				BufferedReader in = new BufferedReader(reader);
-
-				String readed;
-				while ((readed = in.readLine()) != null) {
-				    System.out.println(readed);
-				}
-				
-				return out;//"result";
-			}
-			
-		});
-		data.saveAsTextFile(outputDirectory);
-		*
-		*/
-		
-		
-		
-		
-		/*data = data.map(new Function<String,String>(){
-
-			*//**
-			 * 
-			 *//*
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public String call(String t) throws Exception {
-				System.out.println(t);
-				return t;
-			}
-			
-		});*/
 		JavaPairRDD<String, Tuple2<String, String>> triplesRDD = DataParser.run(data,partitions,kb);
 		
 		
@@ -194,6 +136,7 @@ public class DataPreprocessing {
 		JavaPairRDD<String, Set<Tuple2<String, String>>> entitiesRDD = 
 				DataAggregatorByEntity.run(triplesRDD,partitions);
 
+		
 		entitiesRDD = DataFilter.ensureLIMESConfiguration(entitiesRDD, kb);
 		
 		DataWriterNTriples.saveEntities(entitiesRDD, outputDirectory);
@@ -693,3 +636,67 @@ public class DataPreprocessing {
         });
 	}
 }
+
+
+//DataFilter.kbB = skb;
+
+		/*JavaPairRDD<String, PortableDataStream> binData = ctx.binaryFiles(inputDirectory);
+		
+		
+		JavaRDD<ByteArrayOutputStream> data = binData.map(new Function<Tuple2<String,PortableDataStream>,ByteArrayOutputStream>(){
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public ByteArrayOutputStream call(Tuple2<String, PortableDataStream> file)
+					throws Exception {
+				
+				DataInputStream stream = file._2.open();
+				
+				GZIPInputStream gzis = new GZIPInputStream(stream);
+				
+				byte[] buffer = new byte[1024];
+				ByteArrayOutputStream out = new ByteArrayOutputStream(Integer.MAX_VALUE);
+
+		        int len;
+		        while ((len = gzis.read(buffer)) > 0) {
+		        	out.write(buffer, 0, len);
+		        }
+
+		        gzis.close();
+		    	out.close();
+				
+		    	InputStream input = new ByteArrayInputStream(out.toByteArray());
+				InputStreamReader reader = new InputStreamReader(input);
+				BufferedReader in = new BufferedReader(reader);
+
+				String readed;
+				while ((readed = in.readLine()) != null) {
+				    System.out.println(readed);
+				}
+				
+				return out;//"result";
+			}
+			
+		});
+		data.saveAsTextFile(outputDirectory);
+		*
+		*/
+		
+		
+		
+		
+		/*data = data.map(new Function<String,String>(){
+
+			*//**
+			 * 
+			 *//*
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public String call(String t) throws Exception {
+				System.out.println(t);
+				return t;
+			}
+			
+		});*/

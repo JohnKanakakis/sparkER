@@ -8,6 +8,7 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 
 import scala.Tuple2;
@@ -15,7 +16,7 @@ import scala.Tuple2;
 public class DataWriterNTriples {
 
 	
-	public static void saveTriples(JavaPairRDD<String, Tuple2<String, String>> triplesRDD,String outputDirectory){
+	/*public static void saveTriples(JavaPairRDD<String, Tuple2<String, String>> triplesRDD,String outputDirectory){
 		
 		triplesRDD.map(new Function<Tuple2<String, Tuple2<String, String>>, Text>(){
 
@@ -30,17 +31,22 @@ public class DataWriterNTriples {
 				String predicate = triple._2._1;
 				String object = triple._2._2;
 				
-				text.set(subject +" "+predicate+" "+object);
+				text.set(subject +" "+predicate+" "+object+"");
 				return text;
 			}
 		}).saveAsTextFile(outputDirectory);
 		
-	}
+	}*/
 
 	public static void saveEntities(JavaPairRDD<String, Set<Tuple2<String, String>>> entitiesRDD,
 						    String outputDirectory) {
 		
-		entitiesRDD
+		
+		entitiesRDD = entitiesRDD.cache();
+		
+		entitiesRDD.saveAsObjectFile(outputDirectory+".ser");
+		
+		JavaRDD<String> result = entitiesRDD
 		.map(new Function<Tuple2<String, Set<Tuple2<String, String>>>, String>(){
 
 			private static final long serialVersionUID = 1L;
@@ -60,12 +66,17 @@ public class DataWriterNTriples {
 						object = "<"+object+">";
 					}
 					
-					triples+=("<"+subject+">" +" "+"<"+predicate+">"+" "+object+"\n");
+					triples+=("<"+subject+">" +"\t"+"<"+predicate+">"+"\t"+object+".\n");
 				}
 				//text.set(triples);
 				return triples;
 			}
-		}).saveAsTextFile(outputDirectory);
+		});//.cache();
+		
+		result.saveAsTextFile(outputDirectory);
+		
+		//.saveAsTextFile(outputDirectory);
+		
 		
 	}
 }

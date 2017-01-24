@@ -32,7 +32,7 @@ public class BlocksCreator {
 	 * @return blocks in the form of (block_key, { [r_id1|info1], [r_id2|info2], ..., [r_idN|infoN]})
 	 */
 	public static JavaPairRDD<String, Set<List<String>>> createBlocks( JavaPairRDD<String, Tuple2<String, String>> resourceIndex,
-																		    JavaPairRDD<String, List<String>> resources) {
+																		    final JavaPairRDD<String, List<String>> resources) {
 		
 		Function2<Set<List<String>>,List<String>,Set<List<String>>> seqFunc = 
 				new Function2<Set<List<String>>,List<String>,Set<List<String>>>(){
@@ -78,6 +78,9 @@ public class BlocksCreator {
 								List<String> info = pair._2._2;
 								
 								String word = wordResourceId_pair._1;
+								
+								
+								
 								String r_id = wordResourceId_pair._2;
 								if(info.size()%2 != 0){
 								}else{

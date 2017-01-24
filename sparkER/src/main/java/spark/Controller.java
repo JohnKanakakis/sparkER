@@ -1,6 +1,7 @@
 package spark;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,11 +13,16 @@ import org.aksw.limes.core.execution.rewriter.Rewriter;
 import org.aksw.limes.core.execution.rewriter.RewriterFactory;
 import org.aksw.limes.core.io.config.reader.xml.XMLConfigurationReader;
 import org.aksw.limes.core.io.ls.LinkSpecification;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.storage.StorageLevel;
 import org.slf4j.Logger;
@@ -24,6 +30,9 @@ import org.slf4j.LoggerFactory;
 
 import scala.Tuple2;
 import spark.blockProcessing.BlockPurging;
+import spark.preprocessing.DataAggregatorByEntity;
+import spark.preprocessing.DataFilter;
+import spark.preprocessing.DataParser;
 import spark.preprocessing.EntityFilterOld;
 
 
@@ -63,6 +72,7 @@ public class Controller {
 		}
 		
 		
+		
 		HDFSUtils.deleteHDFSFile(config.getAcceptanceFile());
 		HDFSUtils.deleteHDFSFile(config.getAcceptanceFile()+".ser");
 		
@@ -94,9 +104,9 @@ public class Controller {
 		purging_enabled = Boolean.parseBoolean(args[2]);
 		
 		sparkConf = new SparkConf().setAppName("Controller");
-
 		ctx = new JavaSparkContext(sparkConf);
-
+		Configuration hdfsConf = new org.apache.hadoop.conf.Configuration();
+    	hdfsConf.set("textinputformat.record.delimiter", "\n");
 
 		Broadcast<byte[]> planBinary_B = ctx.broadcast(planBinary);
 		Broadcast<byte[]> configBinary_B = ctx.broadcast(configBinary);
@@ -109,14 +119,28 @@ public class Controller {
 		/*
 		 * reading of source and target data sets
 		 */
+		
 		JavaRDD<Tuple2<String,Set<Tuple2<String,String>>>> records1 = 
 				ctx.objectFile(config.getSourceInfo().getEndpoint());
 
 		JavaRDD<Tuple2<String,Set<Tuple2<String,String>>>> records2 = 
 				ctx.objectFile(config.getTargetInfo().getEndpoint());
 
+		/*JavaPairRDD<LongWritable, Text> data1 = ctx
+		        .newAPIHadoopFile(config.getSourceInfo().getEndpoint(), 
+		        				  TextInputFormat.class, 
+		        				  LongWritable.class, 
+		        				  Text.class,
+		        				  hdfsConf);
 		
 
+		JavaPairRDD<LongWritable, Text> data2 = ctx
+		        .newAPIHadoopFile(config.getTargetInfo().getEndpoint(), 
+		        				  TextInputFormat.class, 
+		        				  LongWritable.class, 
+		        				  Text.class,
+		        				  hdfsConf);*/
+		
 		/*
 		 * filtering of entities and properties according to 
 		 * the LIMES .xml configuration file
@@ -124,16 +148,46 @@ public class Controller {
 
 		
 		
+		//JavaPairRDD<String, Tuple2<String, String>> triplesRDD_1 = DataParser.parse(data1);
+		
+		
+		//triplesRDD = DataFilter.filterByLIMESConfiguration(triplesRDD, skb);
+		
+		//JavaPairRDD<String, Set<Tuple2<String, String>>> entitiesRDD_1 = 
+		//		DataAggregatorByEntity.run(triplesRDD_1);
+
+		//entitiesRDD_1 = DataFilter.ensureLIMESConfiguration(entitiesRDD_1, skb);
+		
+		//JavaPairRDD<String, Tuple2<String, String>> triplesRDD_2 = DataParser.parse(data2);
+		
+		
+		//triplesRDD = DataFilter.filterByLIMESConfiguration(triplesRDD, skb);
+		
+		//JavaPairRDD<String, Set<Tuple2<String, String>>> entitiesRDD_2 = 
+		//		DataAggregatorByEntity.run(triplesRDD_2);
 		
 		
 		
-		JavaPairRDD<String, List<String>> entities1 = null;
+		/*JavaPairRDD<String, List<String>> entities1 = null;
 				//EntityFilterOld.run(records1,skb);
 		JavaPairRDD<String, List<String>> entities2 = null;
 				//EntityFilterOld.run(records2,tkb);
+*/		
+		
+		JavaPairRDD<String, List<String>> entities1 = 
+				DatasetManager.addDatasetId(records1,config.getSourceInfo().getId());
+		
+		JavaPairRDD<String, List<String>> entities2 = 
+				DatasetManager.addDatasetId(records2,config.getTargetInfo().getId());
+		
+		
+		
+		
 		
 		
 
+		
+		
 		JavaPairRDD<String, List<String>> entitiesRDD = 
 				entities1.union(entities2)
 				.persist(StorageLevel.MEMORY_ONLY_SER())
@@ -146,8 +200,11 @@ public class Controller {
 		/*
 		 * creation of token pairs in the form (token, r_id)
 		 */
+		
 		JavaPairRDD<String, String> tokenPairsRDD = 
-				IndexCreator.getTokenPairs(entitiesRDD,skb,tkb).persist(StorageLevel.MEMORY_ONLY_SER());
+				IndexCreator.getTokenPairs(entitiesRDD,skb,tkb)
+				.persist(StorageLevel.MEMORY_ONLY_SER())
+				.setName("tokenIndex");
 		
 
 		
@@ -175,6 +232,8 @@ public class Controller {
 		 * blockSizes are purged 
 		 */
 		
+		
+		//filtering (token,N) , N < optimalSize
 		blockSizesRDD = blockSizesRDD.filter(new Function<Tuple2<String,Integer>,Boolean>(){
 			private static final long serialVersionUID = 1L;
 
