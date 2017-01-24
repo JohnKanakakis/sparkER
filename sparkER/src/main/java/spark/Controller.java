@@ -174,6 +174,10 @@ public class Controller {
 				//EntityFilterOld.run(records2,tkb);
 */		
 		
+		
+		records1 = DataFilter.applyAllPropertiesFilter(records1, skb);
+		records2 = DataFilter.applyAllPropertiesFilter(records2, tkb);
+		
 		JavaPairRDD<String, List<String>> entities1 = 
 				DatasetManager.addDatasetId(records1,config.getSourceInfo().getId());
 		
