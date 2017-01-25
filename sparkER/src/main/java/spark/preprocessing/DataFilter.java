@@ -229,6 +229,9 @@ public class DataFilter {
 	{
 		final KBInfo kb = (KBInfo)HDFSUtils.deserialize(kbB.getValue());
 		
+		final 
+		
+		
 		Function<Tuple2<String, Set<Tuple2<String, String>>>, Boolean> allPropertiesFilter = 
 				new Function<Tuple2<String, Set<Tuple2<String, String>>>, Boolean>(){
 
@@ -238,28 +241,36 @@ public class DataFilter {
 					public Boolean call(Tuple2<String, Set<Tuple2<String, String>>> entity)
 					throws Exception 
 					{
+						List<String> configProperties = kb.getProperties();
+						
+						configProperties.add(TYPE_PROPERTY);
 					
 						Set<Tuple2<String, String>> poPairs = entity._2;
 						boolean entityHasAllProperties = true;
 						
 						
-						logger.info("=============== config properties =============");
-						logger.info(kb.getProperties().toString());
+						/*logger.info("=============== config properties =============");
+						logger.info(configProperties.toString());
 						logger.info("===============================================");
 						
 						logger.info("------------------------------------------------------------------------------------");
-						logger.info("subject:"+entity._1);
+						logger.info("subject:"+entity._1);*/
 						
 						for(Tuple2<String, String> po : poPairs){
 							String property = po._1;
-							logger.info("property:"+ "<"+property+">"+" value|"+po._2);
+							//logger.info("property:"+ "<"+property+">"+" value|"+po._2);
 							if(!kb.getProperties().contains(property)){
 								entityHasAllProperties = false;
 								break;
 							}
 						}
 						
-						logger.info("----------entityHasAllProperties = "+entityHasAllProperties+"-------------------------");
+						if(entityHasAllProperties){
+							logger.info("--------------------------- OK ---------------------------------------------------------");
+							logger.info("subject:"+entity._1);
+							logger.info("----------entityHasAllProperties = "+entityHasAllProperties+"-------------------------");
+						}
+						
 						
 						return entityHasAllProperties;
 					}
