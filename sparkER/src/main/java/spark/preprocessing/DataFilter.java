@@ -47,7 +47,7 @@ public class DataFilter {
 		
 		if (property.equals(TYPE_PROPERTY)
 				&& object.equals(kb.getClassRestriction())) {
-			//System.out.println("entity class filtering "+property +" "+object);
+			//logger.info("entity class filtering "+property +" "+object);
 			return true;
 		}
 
@@ -82,7 +82,7 @@ public class DataFilter {
 						
 						if (property.equals(TYPE_PROPERTY)
 								&& object.equals(entityClassRestriction)) {
-							//System.out.println("entity class filtering "+property +" "+object);
+							//logger.info("entity class filtering "+property +" "+object);
 							return true;
 						}
 
@@ -130,13 +130,13 @@ public class DataFilter {
 				// Create matcher object.
 				Matcher m = r.matcher(result);
 				if (m.find( )) {
-		          System.out.println("Found value1: " + m.group() );
+		          logger.info("Found value1: " + m.group() );
 		          DOI = m.group();
 		          
 		          //cleaning openAIRE's DOIs which have stripped from dashes
 		          if(DOI.contains(" ")){
 		           DOI= DOI.replaceAll(" ","-");
-		           //System.out.println("DOI is: " +DOI );
+		           //logger.info("DOI is: " +DOI );
 		           
 		          }
 		          
@@ -209,7 +209,7 @@ public class DataFilter {
 					String object = po._2;
 					if (property.equals(TYPE_PROPERTY)
 							&& object.equals(kb.getClassRestriction())) {
-						//System.out.println("entity class filtering "+property +" "+object);
+						//logger.info("entity class filtering "+property +" "+object);
 						return true;
 					}
 				}
@@ -241,16 +241,24 @@ public class DataFilter {
 					
 						Set<Tuple2<String, String>> poPairs = entity._2;
 						boolean entityHasAllProperties = true;
-						System.out.println("dataset:"+DatasetManager.getDatasetIdOfEntity(entity._1));
+						
+						
+						logger.info("=============== config properties =============");
+						logger.info(kb.getProperties().toString());
+						logger.info("===============================================");
+						
+						logger.info("------------------------------------------------------------------------------------");
+						logger.info("subject:"+entity._1);
 						
 						for(Tuple2<String, String> po : poPairs){
 							String property = po._1;
-							System.out.println("property:"+ "<"+property+">"+" value|"+po._2);
-							if(!kb.getProperties().contains(property.trim())){
+							logger.info("property:"+ "<"+property+">"+" value|"+po._2);
+							if(!kb.getProperties().contains(property)){
 								entityHasAllProperties = false;
 								break;
 							}
 						}
+						logger.info("------------------------------------------------------------------------------------");
 						
 						return entityHasAllProperties;
 					}
@@ -267,7 +275,7 @@ public class DataFilter {
 }
 
 
-/*System.out.println(configProperties);
+/*logger.info(configProperties);
 System.exit(0);
 JavaPairRDD<String, Tuple2<String, String>> triplesRDD_1 = filterByEntityProperties(triplesRDD,configProperties);
 
@@ -301,13 +309,13 @@ triplesRDD_1 = triplesRDD_1.mapToPair(new PairFunction<Tuple2<String, Tuple2<Str
 		// Create matcher object.
 		Matcher m = r.matcher(result);
 		if (m.find( )) {
-          System.out.println("Found value1: " + m.group() );
+          logger.info("Found value1: " + m.group() );
           DOI = m.group();
           
           //cleaning openAIRE's DOIs which have stripped from dashes
           if(DOI.contains(" ")){
            DOI= DOI.replaceAll(" ","-");
-           //System.out.println("DOI is: " +DOI );
+           //logger.info("DOI is: " +DOI );
            
           }
           
