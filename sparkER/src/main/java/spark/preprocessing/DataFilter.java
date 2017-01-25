@@ -258,7 +258,8 @@ public class DataFilter {
 								break;
 							}
 						}
-						logger.info("------------------------------------------------------------------------------------");
+						
+						logger.info("----------entityHasAllProperties = "+entityHasAllProperties+"-------------------------");
 						
 						return entityHasAllProperties;
 					}

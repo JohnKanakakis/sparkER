@@ -178,6 +178,24 @@ public class Controller {
 		records1 = DataFilter.applyAllPropertiesFilter(records1, skb);
 		records2 = DataFilter.applyAllPropertiesFilter(records2, tkb);
 		
+		
+		boolean zero1 = false;
+		boolean zero2 = false;
+		
+		if(records1.count() == 0){
+			logger.info("records 1 are zero !");
+			zero1 = true;
+		}
+		
+		if(records2.count() == 0){
+			logger.info("records 2 are zero !");
+			zero2 = true;
+		}
+		
+		if(zero1 || zero2){
+			System.exit(0);
+		}
+		
 		JavaPairRDD<String, List<String>> entities1 = 
 				DatasetManager.addDatasetId(records1,config.getSourceInfo().getId());
 		
