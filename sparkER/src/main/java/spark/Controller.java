@@ -179,7 +179,7 @@ public class Controller {
 		records2 = DataFilter.applyAllPropertiesFilter(records2, tkb);
 		
 		
-		boolean zero1 = false;
+		/*boolean zero1 = false;
 		boolean zero2 = false;
 		
 		if(records1.count() == 0){
@@ -194,7 +194,7 @@ public class Controller {
 		
 		if(zero1 || zero2){
 			System.exit(0);
-		}
+		}*/
 		
 		JavaPairRDD<String, List<String>> entities1 = 
 				DatasetManager.addDatasetId(records1,config.getSourceInfo().getId());
@@ -288,6 +288,19 @@ public class Controller {
 				public Boolean call(Tuple2<String, String> indexPair) throws Exception {
 					String blockKey = indexPair._1;
 					return broadcastedPurgedBlockKeys.getValue().contains(blockKey);
+				}
+			});
+			
+			
+			final Broadcast<List<String>> stopwords = ctx.broadcast(ctx.textFile(args[3]).collect());
+			
+			tokenPairsRDD 
+			= tokenPairsRDD.filter(new Function<Tuple2<String,String>,Boolean>(){
+				private static final long serialVersionUID = 1L;
+				@Override
+				public Boolean call(Tuple2<String, String> indexPair) throws Exception {
+					String blockKey = indexPair._1;
+					return !stopwords.getValue().contains(blockKey);
 				}
 			});
 		}

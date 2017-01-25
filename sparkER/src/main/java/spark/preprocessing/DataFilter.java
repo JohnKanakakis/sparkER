@@ -265,11 +265,11 @@ public class DataFilter {
 							}
 						}
 						
-						if(entityHasAllProperties){
+						/*if(entityHasAllProperties){
 							logger.info("--------------------------- OK ---------------------------------------------------------");
 							logger.info("subject:"+entity._1);
 							logger.info("----------entityHasAllProperties = "+entityHasAllProperties+"-------------------------");
-						}
+						}*/
 						
 						
 						return entityHasAllProperties;
