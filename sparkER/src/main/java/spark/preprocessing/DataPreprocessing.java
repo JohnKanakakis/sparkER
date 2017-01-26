@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import it.unimi.dsi.fastutil.objects.ObjectBigArrayBigList;
 import scala.Tuple2;
 import spark.HDFSUtils;
+import spark.SparkUtils;
 
 
 public class DataPreprocessing {
@@ -90,8 +91,8 @@ public class DataPreprocessing {
 		
 		
 		
-		byte[] skbBinary = HDFSUtils.serialize(config.getSourceInfo());
-		byte[] tkbBinary = HDFSUtils.serialize(config.getTargetInfo());
+		byte[] skbBinary = SparkUtils.serialize(config.getSourceInfo());
+		byte[] tkbBinary = SparkUtils.serialize(config.getTargetInfo());
 
 		
 		

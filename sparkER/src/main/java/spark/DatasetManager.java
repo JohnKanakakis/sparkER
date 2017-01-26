@@ -2,12 +2,17 @@ package spark;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.PairFunction;
+import org.apache.spark.broadcast.Broadcast;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import scala.Tuple2;
 
@@ -26,16 +31,46 @@ public class DatasetManager implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
 	private static final String DATASET_STAMP = "_";
-	private static DatasetManager dm = null;
+	public static Logger logger = LoggerFactory.getLogger(DatasetManager.class);
 	
-	public static DatasetManager get() {
-		// TODO Auto-generated method stub
-		if(dm == null){
-			dm = new DatasetManager();
+	
+	//inverts the prefixesMap (prefix,baseURI) to (baseURI,prefix)
+	public static HashMap<String,String> invertPrefixIndex(HashMap<String, String> prefixes){
+		
+		//invert prefixes
+		HashMap<String, String> invertedPrefixes = new HashMap<String, String>();
+		
+		for(Entry<String,String> entry: prefixes.entrySet()){
+			invertedPrefixes.put(entry.getValue(), entry.getKey());
 		}
-		return dm;
+		
+		return invertedPrefixes;
 	}
 	
+	private static String shrinkPredicate(String predicate,HashMap<String, String> prefixes) {
+			
+		String baseURI;
+		String propertyName;
+		int indexOfBaseURIDelimeter;
+		if(predicate.contains("#")){
+			indexOfBaseURIDelimeter = predicate.lastIndexOf("#");
+		}else{
+			indexOfBaseURIDelimeter = predicate.lastIndexOf("/");
+		}
+		
+		baseURI = predicate.substring(0,indexOfBaseURIDelimeter+1);
+		propertyName = predicate.substring(indexOfBaseURIDelimeter+1);
+		//System.out.println(predicate+" ---> "+baseURI + " + "+propertyName);
+		
+		String prefix = prefixes.get(baseURI);
+		
+		if(prefix == null){
+			logger.error("invalid baseURI "+baseURI);
+			System.exit(0);
+		}
+		
+		return prefix+":"+propertyName;
+	}
 	
 	
 	public static String addDatasetIdToEntity(String entity, String datasetId){
@@ -59,9 +94,12 @@ public class DatasetManager implements Serializable{
 
 
 
-	public static JavaPairRDD<String, List<String>> addDatasetId(
-			JavaRDD<Tuple2<String, Set<Tuple2<String, String>>>> records,
-			final String datasetId) {
+	public static JavaPairRDD<String, List<String>> mapRecordsToEntities(JavaRDD<Tuple2<String, Set<Tuple2<String, String>>>> records,
+			                                                             final String datasetId, 
+			                                                             Broadcast<HashMap<String, String>> invertedPrefixIndex_B) 
+	{
+			final HashMap<String, String> invertedPrefixIndex = invertedPrefixIndex_B.getValue();
+			
 			PairFunction<Tuple2<String, Set<Tuple2<String, String>>>, String, List<String>> addDatasetId = 
 				
 				
@@ -80,7 +118,10 @@ public class DatasetManager implements Serializable{
 							
 							ArrayList<String> poPairs = new ArrayList<String>();
 							
+							String predicate;
 							for(Tuple2<String, String> po : triple._2){
+								predicate = po._1;
+								predicate = shrinkPredicate(predicate,invertedPrefixIndex);
 								poPairs.add(po._1);
 								poPairs.add(po._2);
 							}

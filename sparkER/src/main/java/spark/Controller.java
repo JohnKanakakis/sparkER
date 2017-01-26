@@ -2,6 +2,7 @@ package spark;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -92,10 +93,10 @@ public class Controller {
 		 * to the executors 
 		 */
 		
-		byte[] planBinary = HDFSUtils.serialize(plan);
-		byte[] configBinary = HDFSUtils.serialize(config);
-		byte[] skbBinary = HDFSUtils.serialize(config.getSourceInfo());
-		byte[] tkbBinary = HDFSUtils.serialize(config.getTargetInfo());
+		byte[] planBinary = SparkUtils.serialize(plan);
+		byte[] configBinary = SparkUtils.serialize(config);
+		byte[] skbBinary = SparkUtils.serialize(config.getSourceInfo());
+		byte[] tkbBinary = SparkUtils.serialize(config.getTargetInfo());
 
 		
 		/*
@@ -116,6 +117,11 @@ public class Controller {
 		Broadcast<byte[]> tkb = ctx.broadcast(tkbBinary);
 
 
+		Broadcast<HashMap<String, String>> invertedPrefixIndex_B = 
+				ctx.broadcast(DatasetManager.invertPrefixIndex(config.getPrefixes()));
+		
+		
+		
 		/*
 		 * reading of source and target data sets
 		 */
@@ -196,11 +202,13 @@ public class Controller {
 			System.exit(0);
 		}*/
 		
+		
+		// add datasetId to subject and shrink predicates with prefix
 		JavaPairRDD<String, List<String>> entities1 = 
-				DatasetManager.addDatasetId(records1,config.getSourceInfo().getId());
+				DatasetManager.mapRecordsToEntities(records1,config.getSourceInfo().getId(),invertedPrefixIndex_B);
 		
 		JavaPairRDD<String, List<String>> entities2 = 
-				DatasetManager.addDatasetId(records2,config.getTargetInfo().getId());
+				DatasetManager.mapRecordsToEntities(records2,config.getTargetInfo().getId(),invertedPrefixIndex_B);
 		
 		
 		

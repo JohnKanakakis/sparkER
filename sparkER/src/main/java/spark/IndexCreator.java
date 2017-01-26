@@ -52,8 +52,8 @@ public class IndexCreator {
 																  final Broadcast<byte[]> skbB,
 																  final Broadcast<byte[]> tkbB)
 	{
-		final KBInfo skb = (KBInfo)HDFSUtils.deserialize(skbB.getValue());
-		final KBInfo tkb = (KBInfo)HDFSUtils.deserialize(tkbB.getValue());
+		final KBInfo skb = (KBInfo)SparkUtils.deserialize(skbB.getValue());
+		final KBInfo tkb = (KBInfo)SparkUtils.deserialize(tkbB.getValue());
 		final Set<String> sourceProperties = new HashSet<String>(skb.getProperties());
 		final Set<String> targetProperties = new HashSet<String>(tkb.getProperties());
 		

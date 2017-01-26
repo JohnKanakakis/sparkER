@@ -1,14 +1,50 @@
 package spark;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.util.List;
 
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 public class SparkUtils {
 
-	
+	public static byte[] serialize(Object object) {
+		// TODO Auto-generated method stub
+		try {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		    ObjectOutput out = new ObjectOutputStream(bos);
+	        out.writeObject(object);
+	        out.close();
+	        bos.close();
+	        return bos.toByteArray();
+	    } catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		return null;
+	}
+
+	public static Object deserialize(byte[] bytes)  {
+	    try {
+    		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+	        ObjectInput in = new ObjectInputStream(bis);
+	        Object obj = in.readObject();
+	        in.close();
+	        bis.close();
+	        return obj;
+	    } catch (IOException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+	    return null;
+	}
 	
 	public static String eliminateDataTypeFromLiteral(String literal){
 		int pos = literal.lastIndexOf("^^");

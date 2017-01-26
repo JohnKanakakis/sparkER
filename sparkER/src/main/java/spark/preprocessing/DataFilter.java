@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import scala.Tuple2;
 import spark.DatasetManager;
 import spark.HDFSUtils;
+import spark.SparkUtils;
 
 
 /**
@@ -191,7 +192,7 @@ public class DataFilter {
 			JavaPairRDD<String, Set<Tuple2<String, String>>> entitiesRDD, 
 			final Broadcast<byte[]> kbB) {
 		
-		final KBInfo kb = (KBInfo)HDFSUtils.deserialize(kbB.getValue());
+		final KBInfo kb = (KBInfo)SparkUtils.deserialize(kbB.getValue());
 		
 		
 		entitiesRDD = entitiesRDD.filter(new Function<Tuple2<String, Set<Tuple2<String, String>>>,Boolean>(){
@@ -227,7 +228,7 @@ public class DataFilter {
 							JavaRDD<Tuple2<String, Set<Tuple2<String, String>>>> records,
 							final Broadcast<byte[]> kbB) 
 	{
-		final KBInfo kb = (KBInfo)HDFSUtils.deserialize(kbB.getValue());
+		final KBInfo kb = (KBInfo)SparkUtils.deserialize(kbB.getValue());
 		
 		final 
 		

@@ -111,7 +111,7 @@ public class DataParser {
 			
 	
 		
-		final KBInfo kb = (KBInfo)HDFSUtils.deserialize(kbB.getValue());
+		final KBInfo kb = (KBInfo)SparkUtils.deserialize(kbB.getValue());
 		
 			return
 					data.mapToPair(

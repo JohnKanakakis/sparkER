@@ -38,36 +38,7 @@ public class HDFSUtils {
 		
 	}
 	
-	public static byte[] serialize(Object object) {
-		// TODO Auto-generated method stub
-		try {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		    ObjectOutput out = new ObjectOutputStream(bos);
-	        out.writeObject(object);
-	        out.close();
-	        bos.close();
-	        return bos.toByteArray();
-	    } catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-		return null;
-	}
-
-	public static Object deserialize(byte[] bytes)  {
-	    try {
-    		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-	        ObjectInput in = new ObjectInputStream(bis);
-	        Object obj = in.readObject();
-	        in.close();
-	        bis.close();
-	        return obj;
-	    } catch (IOException | ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-	    return null;
-	}
+	
 
 	public static void deleteHDFSFile(String file) {
 		// TODO Auto-generated method stub

@@ -48,9 +48,9 @@ public class Linker {
 			               			  final Broadcast<byte[]> planBinary_B,
 			               			  final Broadcast<byte[]> configBinary_B) {
 		
-		final org.aksw.limes.core.io.config.Configuration config = (org.aksw.limes.core.io.config.Configuration) HDFSUtils.deserialize(configBinary_B.value());
+		final org.aksw.limes.core.io.config.Configuration config = (org.aksw.limes.core.io.config.Configuration) SparkUtils.deserialize(configBinary_B.value());
 		
-		final NestedPlan plan = (NestedPlan) HDFSUtils.deserialize(planBinary_B.getValue());
+		final NestedPlan plan = (NestedPlan) SparkUtils.deserialize(planBinary_B.getValue());
 		
 		
 		
