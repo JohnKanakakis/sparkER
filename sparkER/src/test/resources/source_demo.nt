@@ -1,0 +1,32 @@
+<http://lod.openaire.eu/data/result/doajarticles::89217af00809a91acc15a416e56b3782> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.eurocris.org/ontologies/cerif/1.3#ResultEntity> .
+<http://lod.openaire.eu/data/result/doajarticles::89217af00809a91acc15a416e56b3782> <http://www.eurocris.org/ontologies/cerif/1.3#name> "Une nouvelle anomalie a allure h r ditaire chez des agneaux  it khouzistans /it" .
+<http://lod.openaire.eu/data/result/doajarticles::89217af00809a91acc15a416e56b3782> <http://purl.org/dc/terms/identifier> "10.1186/1297-9686-4-4-599" .
+<http://lod.openaire.eu/data/result/doajarticles::89217af00809a91acc15a416e56b3782> <http://lod.openaire.eu/vocab/year> "1972" .
+<http://lod.openaire.eu/data/result/od_______908::48330d8838bd69f4a0b5d217c4aef3f8> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.eurocris.org/ontologies/cerif/1.3#ResultEntity> .
+<http://lod.openaire.eu/data/result/od_______908::48330d8838bd69f4a0b5d217c4aef3f8> <http://www.eurocris.org/ontologies/cerif/1.3#name> "MIXED LYMPHOCYTE REACTIVITY AGAINST NORMAL CELLS BY SPLENIC LYMPHOCYTES FROM TUMOR BEARING MICE" .
+<http://lod.openaire.eu/data/result/od_______908::48330d8838bd69f4a0b5d217c4aef3f8> <http://purl.org/dc/terms/identifier> "19867388" .
+<http://lod.openaire.eu/data/result/od_______908::48330d8838bd69f4a0b5d217c4aef3f8> <http://lod.openaire.eu/vocab/year> "1974" .
+<http://lod.openaire.eu/data/result/od_______908::a3d0952bc3f6ca5f6efa998a9dc290ba> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.eurocris.org/ontologies/cerif/1.3#ResultEntity> .
+<http://lod.openaire.eu/data/result/od_______908::a3d0952bc3f6ca5f6efa998a9dc290ba> <http://www.eurocris.org/ontologies/cerif/1.3#name> "THE POLARITY OF THE PROXIMAL TUBULE CELL IN RAT KIDNEY" .
+<http://lod.openaire.eu/data/result/od_______908::a3d0952bc3f6ca5f6efa998a9dc290ba> <http://purl.org/dc/terms/identifier> "4261147" .
+<http://lod.openaire.eu/data/result/od_______908::a3d0952bc3f6ca5f6efa998a9dc290ba> <http://lod.openaire.eu/vocab/year> "1972" .
+<http://lod.openaire.eu/data/result/od________18::72b67c693e187c76fe5c8f926919f85b> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.eurocris.org/ontologies/cerif/1.3#ResultEntity> .
+<http://lod.openaire.eu/data/result/od________18::72b67c693e187c76fe5c8f926919f85b> <http://www.eurocris.org/ontologies/cerif/1.3#name> "SURFACE CURRENT CARRYING DOMAIN WALLS" .
+<http://lod.openaire.eu/data/result/od________18::72b67c693e187c76fe5c8f926919f85b> <http://purl.org/dc/terms/identifier> "10.1088/0305-4470/29/16/030" .
+<http://lod.openaire.eu/data/result/od________18::72b67c693e187c76fe5c8f926919f85b> <http://lod.openaire.eu/vocab/year> "1995" .
+<http://lod.openaire.eu/data/result/od_______908::f138f48b772a88b3a2bcb36b4cefec28> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.eurocris.org/ontologies/cerif/1.3#ResultEntity> .
+<http://lod.openaire.eu/data/result/od_______908::f138f48b772a88b3a2bcb36b4cefec28> <http://www.eurocris.org/ontologies/cerif/1.3#name> "Cation transport in Escherichia coli. IX. Regulation of K transport" .
+<http://lod.openaire.eu/data/result/od_______908::f138f48b772a88b3a2bcb36b4cefec28> <http://purl.org/dc/terms/identifier> "359759" .
+<http://lod.openaire.eu/data/result/od_______908::f138f48b772a88b3a2bcb36b4cefec28> <http://lod.openaire.eu/vocab/year> "1978" .
+<http://lod.openaire.eu/data/result/od______1690::1acd6ea74e8cdd6499a926d068733491> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.eurocris.org/ontologies/cerif/1.3#ResultEntity> .
+<http://lod.openaire.eu/data/result/od______1690::1acd6ea74e8cdd6499a926d068733491> <http://www.eurocris.org/ontologies/cerif/1.3#name> "7 oxo PgI2 induced late appearing and long lasting electrophysiological changes in the heart in situ of the rabbit  guinea pig  dog and cat" .
+<http://lod.openaire.eu/data/result/od______1690::1acd6ea74e8cdd6499a926d068733491> <http://purl.org/dc/terms/identifier> "10.1016/0022-2828-89-90820-1" .
+<http://lod.openaire.eu/data/result/od______1690::1acd6ea74e8cdd6499a926d068733491> <http://lod.openaire.eu/vocab/year> "1989" .
+<http://lod.openaire.eu/data/result/doajarticles::dae2d466e7c658a53e286b68abb83be0> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.eurocris.org/ontologies/cerif/1.3#ResultEntity> .
+<http://lod.openaire.eu/data/result/doajarticles::dae2d466e7c658a53e286b68abb83be0> <http://www.eurocris.org/ontologies/cerif/1.3#name> "Adult Onset Still s Disease: A Review on Diagnostic Workup and Treatment Options" .
+<http://lod.openaire.eu/data/result/doajarticles::dae2d466e7c658a53e286b68abb83be0> <http://purl.org/dc/terms/identifier> "10.1155/2016/6502373" .
+<http://lod.openaire.eu/data/result/doajarticles::dae2d466e7c658a53e286b68abb83be0> <http://lod.openaire.eu/vocab/year> "2016" .
+<http://lod.openaire.eu/data/result/od_______908::b434da51e0071531ef6bcb099e481208> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.eurocris.org/ontologies/cerif/1.3#ResultEntity> .
+<http://lod.openaire.eu/data/result/od_______908::b434da51e0071531ef6bcb099e481208> <http://www.eurocris.org/ontologies/cerif/1.3#name> "Building a network of research in children s environmental health." .
+<http://lod.openaire.eu/data/result/od_______908::b434da51e0071531ef6bcb099e481208> <http://purl.org/dc/terms/identifier> "10346987" .
+<http://lod.openaire.eu/data/result/od_______908::b434da51e0071531ef6bcb099e481208> <http://lod.openaire.eu/vocab/year> "1999" .

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE LIMES SYSTEM "limes.dtd">
+<LIMES>
+	<PREFIX>
+		<NAMESPACE>http://www.w3.org/1999/02/22-rdf-syntax-ns#</NAMESPACE>
+		<LABEL>rdf</LABEL>
+	</PREFIX>
+	<PREFIX>
+		<NAMESPACE>http://www.w3.org/2000/01/rdf-schema#</NAMESPACE>
+		<LABEL>rdfs</LABEL>
+	</PREFIX>
+	<PREFIX>
+		<NAMESPACE>http://www.eurocris.org/ontologies/cerif/1.3#</NAMESPACE>
+		<LABEL>cerif</LABEL>
+	</PREFIX>
+	<PREFIX>
+		<NAMESPACE>http://lod.openaire.eu/vocab/</NAMESPACE>
+		<LABEL>oa</LABEL>
+	</PREFIX>
+	<PREFIX>
+		<NAMESPACE>http://purl.org/dc/terms/</NAMESPACE>
+		<LABEL>dc</LABEL>
+	</PREFIX>
+	<PREFIX>
+		<NAMESPACE>http://xmlns.com/foaf/0.1/</NAMESPACE>
+		<LABEL>foaf</LABEL>
+	</PREFIX>
+	
+	<SOURCE>
+		<ID>source1</ID>
+		<ENDPOINT>/tmp/oa-publications.ser</ENDPOINT>
+		<VAR>?x</VAR>
+		<PAGESIZE>100</PAGESIZE>
+		<RESTRICTION>?x rdf:type cerif:ResultEntity</RESTRICTION>
+		<PROPERTY>oa:year RENAME Year</PROPERTY> 
+        <PROPERTY>dc:identifier RENAME doi</PROPERTY>
+		<PROPERTY>cerif:name AS lowercase->regexreplace("[^A-Za-z0-9]"," ") RENAME publicationName</PROPERTY>
+	</SOURCE>
+	<TARGET>
+		<ID>source2</ID>
+		<ENDPOINT>/tmp/dblp-publications.ser</ENDPOINT>
+		<VAR>?y</VAR>
+		<PAGESIZE>100</PAGESIZE>
+		<RESTRICTION>?y rdf:type foaf:Document</RESTRICTION>
+		<PROPERTY>dc:issued RENAME Year</PROPERTY> 
+        <PROPERTY>dcterms:identifier RENAME doi</PROPERTY> 
+		<PROPERTY>rdfs:label AS lowercase->regexreplace("[^A-Za-z0-9]"," ") RENAME articleName</PROPERTY>
+		
+	</TARGET>
+	<METRIC>MAX ( AND(jaro(x.publicationName,y.articleName)|0.8 , ExactMatch(x.Year,y.Year)|1.0 ) , jaro(x.doi,y.doi)|0.95 ) </METRIC>
+	<ACCEPTANCE>
+		<THRESHOLD>0.8</THRESHOLD>
+		<FILE>/tmp/big-linkset/accepted_links_0.8_no_purge</FILE>
+		<RELATION>owl:sameAs</RELATION>
+	</ACCEPTANCE>
+	<REVIEW>
+		<THRESHOLD>0.8</THRESHOLD>
+		<FILE>/tmp/big-linkset/verified_links_0.8</FILE>
+		<RELATION>owl:sameAs</RELATION>
+		
+	</REVIEW>
+	<EXECUTION>Default</EXECUTION>
+	<OUTPUT>TTL</OUTPUT>
+</LIMES>
