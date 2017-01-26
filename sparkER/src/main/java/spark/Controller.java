@@ -230,9 +230,10 @@ public class Controller {
 		/*
 		 * creation of token pairs in the form (token, r_id)
 		 */
+		final Broadcast<List<String>> stopwords = ctx.broadcast(ctx.textFile(args[3]).collect());
 		
 		JavaPairRDD<String, String> tokenPairsRDD = 
-				IndexCreator.getTokenPairs(entitiesRDD,skb,tkb)
+				IndexCreator.getTokenPairs(entitiesRDD,skb,tkb,stopwords)
 				.persist(StorageLevel.MEMORY_ONLY_SER())
 				.setName("tokenIndex");
 		
@@ -300,8 +301,8 @@ public class Controller {
 			});
 			
 			
-			final Broadcast<List<String>> stopwords = ctx.broadcast(ctx.textFile(args[3]).collect());
 			
+			/*
 			tokenPairsRDD 
 			= tokenPairsRDD.filter(new Function<Tuple2<String,String>,Boolean>(){
 				private static final long serialVersionUID = 1L;
@@ -310,7 +311,7 @@ public class Controller {
 					String blockKey = indexPair._1;
 					return !stopwords.getValue().contains(blockKey);
 				}
-			});
+			});*/
 		}
 
 	

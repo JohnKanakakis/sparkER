@@ -108,7 +108,7 @@ public class LIMES_1 {
 		
 		
 		
-		
+		System.out.println(config.getSourceInfo().getProperties());
 		
 		System.out.println("source cache "+m1.size());
 		System.out.println("target cache "+m2.size());

@@ -46,16 +46,20 @@ public class IndexCreator {
 	 * @param entitiesRDD : RDD in the form of (e_id, [info])
 	 * @param skbB : source KBInfo
 	 * @param tkbB : target KBInfo
+	 * @param stopwords 
 	 * @return tokenPairs in the form of (token, e_id)
 	 */
 	public static JavaPairRDD<String, String> getTokenPairs(JavaPairRDD<String,List<String>> entitiesRDD,
 																  final Broadcast<byte[]> skbB,
-																  final Broadcast<byte[]> tkbB)
+																  final Broadcast<byte[]> tkbB,
+																  Broadcast<List<String>> stopwords_B)
 	{
 		final KBInfo skb = (KBInfo)SparkUtils.deserialize(skbB.getValue());
 		final KBInfo tkb = (KBInfo)SparkUtils.deserialize(tkbB.getValue());
 		final Set<String> sourceProperties = new HashSet<String>(skb.getProperties());
 		final Set<String> targetProperties = new HashSet<String>(tkb.getProperties());
+		final Set<String> stopwords = new HashSet<String>(stopwords_B.getValue());
+		
 		
 		PairFlatMapFunction<Iterator<Tuple2<String, List<String>>>, String, String> f = 
 		
@@ -132,6 +136,10 @@ public class IndexCreator {
 					for(int i = 0; i < tokens.length; i++){
 						tokens[i] = tokens[i].trim();
 						if(tokens[i].length() == 0) continue;
+						
+						
+						if(stopwords.contains(tokens[i])) continue;
+						
 						t = new Tuple2<String,String>(tokens[i],e_id);
 						tokenPairs.add(t);
 					}
