@@ -47,7 +47,7 @@ public class DatasetManager implements Serializable{
 		return invertedPrefixes;
 	}
 	
-	private static String shrinkPredicate(String predicate,HashMap<String, String> prefixes) {
+	private static String shrinkURI(String predicate,HashMap<String, String> prefixes) {
 			
 		String baseURI;
 		String propertyName;
@@ -119,11 +119,17 @@ public class DatasetManager implements Serializable{
 							ArrayList<String> poPairs = new ArrayList<String>();
 							
 							String predicate;
+							String object;
 							for(Tuple2<String, String> po : triple._2){
 								predicate = po._1;
-								predicate = shrinkPredicate(predicate,invertedPrefixIndex);
-								poPairs.add(po._1);
-								poPairs.add(po._2);
+								object = po._2;
+								predicate = shrinkURI(predicate,invertedPrefixIndex);
+								
+								if(predicate.equals("rdf:type")){
+						  			object = shrinkURI(object,invertedPrefixIndex);
+						  		}
+								poPairs.add(predicate);
+								poPairs.add(object);
 							}
 							//System.out.println("po list size = "+poPairs.size());
 							return new Tuple2<String, List<String>>(subject,poPairs);
