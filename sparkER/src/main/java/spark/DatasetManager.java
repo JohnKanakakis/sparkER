@@ -60,12 +60,13 @@ public class DatasetManager implements Serializable{
 		
 		baseURI = predicate.substring(0,indexOfBaseURIDelimeter+1);
 		propertyName = predicate.substring(indexOfBaseURIDelimeter+1);
-		//System.out.println(predicate+" ---> "+baseURI + " + "+propertyName);
+		
 		
 		String prefix = prefixes.get(baseURI);
 		
 		if(prefix == null){
 			logger.error("invalid baseURI "+baseURI);
+			logger.error(predicate+" ---> "+baseURI + " + "+propertyName);
 			System.exit(0);
 		}
 		

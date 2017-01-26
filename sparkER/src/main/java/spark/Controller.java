@@ -203,7 +203,7 @@ public class Controller {
 		}*/
 		
 		
-		// add datasetId to subject and shrink predicates with prefix
+		// add datasetId to subject and shrink URIs
 		JavaPairRDD<String, List<String>> entities1 = 
 				DatasetManager.mapRecordsToEntities(records1,config.getSourceInfo().getId(),invertedPrefixIndex_B);
 		
