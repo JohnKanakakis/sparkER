@@ -47,30 +47,36 @@ public class DatasetManager implements Serializable{
 		return invertedPrefixes;
 	}
 	
-	private static String shrinkURI(String predicate,HashMap<String, String> prefixes) {
+	public static String shrinkURI(String uri,HashMap<String, String> prefixes) {
 			
 		String baseURI;
-		String propertyName;
+		String name;
 		int indexOfBaseURIDelimeter;
-		if(predicate.contains("#")){
-			indexOfBaseURIDelimeter = predicate.lastIndexOf("#");
+		if(uri.contains("#")){
+			indexOfBaseURIDelimeter = uri.lastIndexOf("#");
 		}else{
-			indexOfBaseURIDelimeter = predicate.lastIndexOf("/");
+			indexOfBaseURIDelimeter = uri.lastIndexOf("/");
+		}
+		if(indexOfBaseURIDelimeter == -1){
+			logger.warn("invalid URI "+uri);
+			
+			return null;
 		}
 		
-		baseURI = predicate.substring(0,indexOfBaseURIDelimeter+1);
-		propertyName = predicate.substring(indexOfBaseURIDelimeter+1);
+		baseURI = uri.substring(0,indexOfBaseURIDelimeter+1);
+		name = uri.substring(indexOfBaseURIDelimeter+1);
 		
 		
 		String prefix = prefixes.get(baseURI);
 		
 		if(prefix == null){
-			logger.error("invalid baseURI "+baseURI);
-			logger.error(predicate+" ---> "+baseURI + " + "+propertyName);
-			System.exit(0);
+			logger.warn("invalid baseURI "+baseURI);
+			logger.warn(uri+" ---> "+baseURI + " + "+name);
+			//System.exit(0);
+			return null;
 		}
 		
-		return prefix+":"+propertyName;
+		return prefix+":"+name;
 	}
 	
 	
@@ -97,9 +103,13 @@ public class DatasetManager implements Serializable{
 
 	public static JavaPairRDD<String, List<String>> mapRecordsToEntities(JavaRDD<Tuple2<String, Set<Tuple2<String, String>>>> records,
 			                                                             final String datasetId, 
-			                                                             Broadcast<HashMap<String, String>> invertedPrefixIndex_B) 
+			                                                             Broadcast<HashMap<String, String>> prefixIndex_B) 
 	{
-			final HashMap<String, String> invertedPrefixIndex = invertedPrefixIndex_B.getValue();
+		
+			
+			final HashMap<String, String> prefixIndex = prefixIndex_B.getValue();
+			final HashMap<String, String> invertedPrefixIndex = invertPrefixIndex(prefixIndex);
+			
 			
 			PairFunction<Tuple2<String, Set<Tuple2<String, String>>>, String, List<String>> addDatasetId = 
 				
@@ -129,6 +139,7 @@ public class DatasetManager implements Serializable{
 								if(predicate.equals("rdf:type")){
 						  			object = shrinkURI(object,invertedPrefixIndex);
 						  		}
+								//logger.info(predicate + " "+object);
 								poPairs.add(predicate);
 								poPairs.add(object);
 							}
@@ -138,5 +149,15 @@ public class DatasetManager implements Serializable{
 				
 			};
 		return  records.mapToPair(addDatasetId);
+	}
+
+	public static String getURIOfPredicate(String property,
+			HashMap<String, String> prefixIndex) {
+		int prefixDelimiterIndex = property.indexOf(":");
+		String prefix = property.substring(0,prefixDelimiterIndex);
+		String propertyName = property.substring(prefixDelimiterIndex+1);
+		String baseURI = prefixIndex.get(prefix);
+		String propertyURI = baseURI+propertyName;
+		return propertyURI;
 	}
 }

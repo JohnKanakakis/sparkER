@@ -4,6 +4,7 @@ package spark.preprocessing;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,6 +38,7 @@ public class DataFilter {
 	
 	public static Logger logger = LoggerFactory.getLogger(DataFilter.class);
 	public final static String TYPE_PROPERTY = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";//RDF.type;
+	protected static final String TYPE_PROPERTY_PREFIX = "rdf:type";
 	
 	public static Broadcast<byte[]> kbB;
 	
@@ -226,12 +228,13 @@ public class DataFilter {
 
 	public static JavaRDD<Tuple2<String, Set<Tuple2<String, String>>>> applyAllPropertiesFilter(
 							JavaRDD<Tuple2<String, Set<Tuple2<String, String>>>> records,
-							final Broadcast<byte[]> kbB) 
+							final Broadcast<byte[]> kbB,
+							Broadcast<HashMap<String, String>> prefixIndex_B) 
 	{
 		final KBInfo kb = (KBInfo)SparkUtils.deserialize(kbB.getValue());
 		
-		final 
-		
+		final HashMap<String, String> prefixIndex = prefixIndex_B.getValue();
+		final HashMap<String, String> invertedPrefixIndex = DatasetManager.invertPrefixIndex(prefixIndex);
 		
 		Function<Tuple2<String, Set<Tuple2<String, String>>>, Boolean> allPropertiesFilter = 
 				new Function<Tuple2<String, Set<Tuple2<String, String>>>, Boolean>(){
@@ -244,7 +247,7 @@ public class DataFilter {
 					{
 						List<String> configProperties = kb.getProperties();
 						
-						configProperties.add(TYPE_PROPERTY);
+						configProperties.add(TYPE_PROPERTY_PREFIX);
 					
 						Set<Tuple2<String, String>> poPairs = entity._2;
 						boolean entityHasAllProperties = true;
@@ -259,9 +262,13 @@ public class DataFilter {
 						
 						for(Tuple2<String, String> po : poPairs){
 							String property = po._1;
-							//logger.info("property:"+ "<"+property+">"+" value|"+po._2);
-							if(!kb.getProperties().contains(property)){
+							
+							
+							String propertyWithPrefix = DatasetManager.shrinkURI(property,invertedPrefixIndex);
+							
+							if(!kb.getProperties().contains(propertyWithPrefix)){
 								entityHasAllProperties = false;
+								//logger.info(propertyWithPrefix);
 								break;
 							}
 						}

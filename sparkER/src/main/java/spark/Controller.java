@@ -117,8 +117,8 @@ public class Controller {
 		Broadcast<byte[]> tkb = ctx.broadcast(tkbBinary);
 
 
-		Broadcast<HashMap<String, String>> invertedPrefixIndex_B = 
-				ctx.broadcast(DatasetManager.invertPrefixIndex(config.getPrefixes()));
+		Broadcast<HashMap<String, String>> prefixIndex_B = 
+				ctx.broadcast(config.getPrefixes());
 		
 		
 		
@@ -181,8 +181,8 @@ public class Controller {
 */		
 		
 		
-		records1 = DataFilter.applyAllPropertiesFilter(records1, skb);
-		records2 = DataFilter.applyAllPropertiesFilter(records2, tkb);
+		records1 = DataFilter.applyAllPropertiesFilter(records1, skb,prefixIndex_B);
+		records2 = DataFilter.applyAllPropertiesFilter(records2, tkb,prefixIndex_B);
 		
 		
 		/*boolean zero1 = false;
@@ -205,10 +205,10 @@ public class Controller {
 		
 		// add datasetId to subject and shrink URIs
 		JavaPairRDD<String, List<String>> entities1 = 
-				DatasetManager.mapRecordsToEntities(records1,config.getSourceInfo().getId(),invertedPrefixIndex_B);
+				DatasetManager.mapRecordsToEntities(records1,config.getSourceInfo().getId(),prefixIndex_B);
 		
 		JavaPairRDD<String, List<String>> entities2 = 
-				DatasetManager.mapRecordsToEntities(records2,config.getTargetInfo().getId(),invertedPrefixIndex_B);
+				DatasetManager.mapRecordsToEntities(records2,config.getTargetInfo().getId(),prefixIndex_B);
 		
 		
 		

@@ -110,6 +110,11 @@ public class LIMES_1 {
 		
 		System.out.println(config.getSourceInfo().getProperties());
 		
+		
+		for(String property : config.getSourceInfo().getProperties()){
+			System.out.println(property+" ---> "+DatasetManager.getURIOfPredicate(property, config.getPrefixes()));
+		}
+		
 		System.out.println("source cache "+m1.size());
 		System.out.println("target cache "+m2.size());
 		
