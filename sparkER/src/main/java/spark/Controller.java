@@ -138,53 +138,7 @@ public class Controller {
 		JavaRDD<Tuple2<String,Set<Tuple2<String,String>>>> records2 = 
 				ctx.objectFile(config.getTargetInfo().getEndpoint());
 
-		/*JavaPairRDD<LongWritable, Text> data1 = ctx
-		        .newAPIHadoopFile(config.getSourceInfo().getEndpoint(), 
-		        				  TextInputFormat.class, 
-		        				  LongWritable.class, 
-		        				  Text.class,
-		        				  hdfsConf);
 		
-
-		JavaPairRDD<LongWritable, Text> data2 = ctx
-		        .newAPIHadoopFile(config.getTargetInfo().getEndpoint(), 
-		        				  TextInputFormat.class, 
-		        				  LongWritable.class, 
-		        				  Text.class,
-		        				  hdfsConf);*/
-		
-		/*
-		 * filtering of entities and properties according to 
-		 * the LIMES .xml configuration file
-		 */
-
-		
-		
-		//JavaPairRDD<String, Tuple2<String, String>> triplesRDD_1 = DataParser.parse(data1);
-		
-		
-		//triplesRDD = DataFilter.filterByLIMESConfiguration(triplesRDD, skb);
-		
-		//JavaPairRDD<String, Set<Tuple2<String, String>>> entitiesRDD_1 = 
-		//		DataAggregatorByEntity.run(triplesRDD_1);
-
-		//entitiesRDD_1 = DataFilter.ensureLIMESConfiguration(entitiesRDD_1, skb);
-		
-		//JavaPairRDD<String, Tuple2<String, String>> triplesRDD_2 = DataParser.parse(data2);
-		
-		
-		//triplesRDD = DataFilter.filterByLIMESConfiguration(triplesRDD, skb);
-		
-		//JavaPairRDD<String, Set<Tuple2<String, String>>> entitiesRDD_2 = 
-		//		DataAggregatorByEntity.run(triplesRDD_2);
-		
-		
-		
-		/*JavaPairRDD<String, List<String>> entities1 = null;
-				//EntityFilterOld.run(records1,skb);
-		JavaPairRDD<String, List<String>> entities2 = null;
-				//EntityFilterOld.run(records2,tkb);
-*/		
 		
 		if(filter_all){
 			records1 = DataFilter.applyAllPropertiesFilter(records1, skb,prefixIndex_B);
@@ -193,22 +147,6 @@ public class Controller {
 		
 		
 		
-		/*boolean zero1 = false;
-		boolean zero2 = false;
-		
-		if(records1.count() == 0){
-			logger.info("records 1 are zero !");
-			zero1 = true;
-		}
-		
-		if(records2.count() == 0){
-			logger.info("records 2 are zero !");
-			zero2 = true;
-		}
-		
-		if(zero1 || zero2){
-			System.exit(0);
-		}*/
 		
 		
 		// add datasetId to subject and shrink URIs
@@ -258,46 +196,48 @@ public class Controller {
 				.setName("blockSizesRDD");
 
 		
-		/*
-		 * purging
-		 */
-
-		final int optimalSize = BlockPurging.getOptimalBlockSize(blockSizesRDD);
-
 		
-
-
-		/*
-		 * blockSizes are purged 
-		 */
-		
-		
-		//filtering (token,N) , N < optimalSize
-		blockSizesRDD = blockSizesRDD.filter(new Function<Tuple2<String,Integer>,Boolean>(){
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public Boolean call(Tuple2<String,Integer> block) 
-			throws Exception {
-				// TODO Auto-generated method stub
-				return (block._2 > 1 && block._2 <= optimalSize);
-			}
-		});
-
-
-		/*
-		 * blockSizesRDD is locally collected and distributed as a HashSet
-		 */
-		HashSet<String> localPurgedBlockKeysSet = new HashSet<String>(blockSizesRDD.keys().collect());
-
-		final Broadcast<HashSet<String>> broadcastedPurgedBlockKeys = 
-				ctx.broadcast(localPurgedBlockKeysSet);
-
-
 		/*
 		 * if purging is enabled the tokenPairs RDD is purged
 		 */
 		if(purging_enabled){
+			
+			/*
+			 * optimal blocksize
+			 */
+
+			final int optimalSize = BlockPurging.getOptimalBlockSize(blockSizesRDD);
+
+			
+
+
+			/*
+			 * blockSizes are purged 
+			 */
+			
+			
+			//filtering (token,N) , N < optimalSize
+			blockSizesRDD = blockSizesRDD.filter(new Function<Tuple2<String,Integer>,Boolean>(){
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public Boolean call(Tuple2<String,Integer> block) 
+				throws Exception {
+					// TODO Auto-generated method stub
+					return (block._2 > 1 && block._2 <= optimalSize);
+				}
+			});
+
+
+			/*
+			 * blockSizesRDD is locally collected and distributed as a HashSet
+			 */
+			HashSet<String> localPurgedBlockKeysSet = new HashSet<String>(blockSizesRDD.keys().collect());
+
+			final Broadcast<HashSet<String>> broadcastedPurgedBlockKeys = 
+					ctx.broadcast(localPurgedBlockKeysSet);
+
+
 			tokenPairsRDD 
 			= tokenPairsRDD.filter(new Function<Tuple2<String,String>,Boolean>(){
 				private static final long serialVersionUID = 1L;
@@ -308,18 +248,6 @@ public class Controller {
 				}
 			});
 			
-			
-			
-			/*
-			tokenPairsRDD 
-			= tokenPairsRDD.filter(new Function<Tuple2<String,String>,Boolean>(){
-				private static final long serialVersionUID = 1L;
-				@Override
-				public Boolean call(Tuple2<String, String> indexPair) throws Exception {
-					String blockKey = indexPair._1;
-					return !stopwords.getValue().contains(blockKey);
-				}
-			});*/
 		}
 
 	

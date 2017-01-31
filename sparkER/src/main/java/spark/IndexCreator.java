@@ -25,22 +25,7 @@ public class IndexCreator {
 	
 	public static Logger logger = LoggerFactory.getLogger(IndexCreator.class);
 	
-	/*public static void main(String args[]){
-		String s1 = "A Java based tool for the 0-9 design of-class-ification microarrays. ";
-		String s2 = "A Java based tool for the design of classification microarrays ";
-		
-		String[] tokens = s1.replaceAll("[^A-Za-z0-9 ]", " ").split(" ");
-		
-		for(int i = 0; i < tokens.length; i++){
-			tokens[i] = tokens[i].trim().toLowerCase();
-			System.out.println(tokens[i]+"#");
-		}
-		tokens = s2.replaceAll("[^A-Za-z0-9 ]", " ").split(" ");
-		for(int i = 0; i < tokens.length; i++){
-			tokens[i] = tokens[i].replaceAll("[^A-Za-z0-9 ]", " ").trim().toLowerCase();
-			System.out.println(tokens[i]+"#");
-		}
-	}*/
+	
 
 	/**
 	 * @param entitiesRDD : RDD in the form of (e_id, [info])
@@ -99,33 +84,11 @@ public class IndexCreator {
 					}
 					//clear BKV
 					BKV = "";
-					/*for(int i = 0; i < r_info.size()-1; i = i + 2){
-						predicate = r_info.get(i);
-						//if(kbProperties.contains(predicate)){
-							object = r_info.get(i+1);
-							//object = DataFormatter.eliminateDataTypeFromLiteral(object).replace("\"", "");;
-							try{
-			                    object = URLDecoder.decode(object, "UTF-8").replaceAll("_", " ");
-			                } catch (Exception ex) {
-			                	object = object.replaceAll("_", " ");
-			                }
-							//BKV+=(object+" ");
-							tokens = object.split("[\\W_]");
-
-							for (int j = 0; j < tokens.length; j++) {
-								tokens[j] = tokens[j].trim();
-								if(tokens[j].length() == 0) continue;
-								t = new Tuple2<String,String>(tokens[j],e_id);
-								tokenPairs.add(t);
-							}
-						//}
-					}*/
 					
 					
 					for(int i = 0; i < r_info.size()-1; i = i + 2){
 						predicate = r_info.get(i);
-						//object = DataFormatter.eliminateDataTypeFromLiteral(r_info.get(i+1));
-						//object = object.replace("\"", "");
+					
 						if(kbProperties.contains(predicate)){
 							object = SparkUtils.eliminateDataTypeFromLiteral(r_info.get(i+1));
 							BKV+=(object.replace("\"", "")+" ");
