@@ -136,9 +136,12 @@ public class DatasetManager implements Serializable{
 								object = po._2;
 								predicate = shrinkURI(predicate,invertedPrefixIndex);
 								
+								if (predicate == null) continue;
+								
 								if(predicate.equals("rdf:type")){
 						  			object = shrinkURI(object,invertedPrefixIndex);
 						  		}
+								if(object == null) continue;
 								//logger.info(predicate + " "+object);
 								poPairs.add(predicate);
 								poPairs.add(object);

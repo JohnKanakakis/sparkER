@@ -46,22 +46,28 @@ import spark.preprocessing.EntityFilterOld;
  */
 public class Controller {
 
-	private static String STATS_FILE;
+	
 	public static Logger logger = LoggerFactory.getLogger(Controller.class);
 	static SparkConf sparkConf;
 	static JavaSparkContext ctx;
 	
 	
-	static boolean purging_enabled;
 	
 	
 	public static void main(String[] args) {
 		
+		String LIMES_CONFIG_XML = args[0];
+		String LIMES_DTD = args[1];
+		Boolean purging_enabled = Boolean.parseBoolean(args[2]);
+		String STOPWORDS_FILE = args[3];
+		boolean filter_all = Boolean.parseBoolean(args[4]);
+		
+		
 		/*
 		 * reading and validation of LIMES configuration files
 		 */
-		InputStream configFile = HDFSUtils.getHDFSFile(args[0]);
-		InputStream dtdFile = HDFSUtils.getHDFSFile(args[1]);
+		InputStream configFile = HDFSUtils.getHDFSFile(LIMES_CONFIG_XML);
+		InputStream dtdFile = HDFSUtils.getHDFSFile(LIMES_DTD);
 
 		XMLConfigurationReader reader = new XMLConfigurationReader();
 		org.aksw.limes.core.io.config.Configuration config = reader.validateAndRead(configFile,dtdFile);
@@ -102,7 +108,7 @@ public class Controller {
 		/*
 		 * user defines if purging will be enabled during execution
 		 */
-		purging_enabled = Boolean.parseBoolean(args[2]);
+		
 		
 		sparkConf = new SparkConf().setAppName("Controller");
 		ctx = new JavaSparkContext(sparkConf);
@@ -180,9 +186,11 @@ public class Controller {
 				//EntityFilterOld.run(records2,tkb);
 */		
 		
+		if(filter_all){
+			records1 = DataFilter.applyAllPropertiesFilter(records1, skb,prefixIndex_B);
+			records2 = DataFilter.applyAllPropertiesFilter(records2, tkb,prefixIndex_B);
+		}
 		
-		records1 = DataFilter.applyAllPropertiesFilter(records1, skb,prefixIndex_B);
-		records2 = DataFilter.applyAllPropertiesFilter(records2, tkb,prefixIndex_B);
 		
 		
 		/*boolean zero1 = false;
@@ -230,7 +238,7 @@ public class Controller {
 		/*
 		 * creation of token pairs in the form (token, r_id)
 		 */
-		final Broadcast<List<String>> stopwords = ctx.broadcast(ctx.textFile(args[3]).collect());
+		final Broadcast<List<String>> stopwords = ctx.broadcast(ctx.textFile(STOPWORDS_FILE).collect());
 		
 		JavaPairRDD<String, String> tokenPairsRDD = 
 				IndexCreator.getTokenPairs(entitiesRDD,skb,tkb,stopwords)
