@@ -107,8 +107,7 @@ public class Controller {
 		
 		sparkConf = new SparkConf().setAppName("Controller");
 		ctx = new JavaSparkContext(sparkConf);
-		Configuration hdfsConf = new org.apache.hadoop.conf.Configuration();
-    	hdfsConf.set("textinputformat.record.delimiter", "\n");
+		
 
 		Broadcast<byte[]> planBinary_B = ctx.broadcast(planBinary);
 		Broadcast<byte[]> configBinary_B = ctx.broadcast(configBinary);
