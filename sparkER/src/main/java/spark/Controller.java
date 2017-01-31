@@ -105,11 +105,6 @@ public class Controller {
 		byte[] tkbBinary = SparkUtils.serialize(config.getTargetInfo());
 
 		
-		/*
-		 * user defines if purging will be enabled during execution
-		 */
-		
-		
 		sparkConf = new SparkConf().setAppName("Controller");
 		ctx = new JavaSparkContext(sparkConf);
 		Configuration hdfsConf = new org.apache.hadoop.conf.Configuration();
