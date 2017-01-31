@@ -281,10 +281,11 @@ public class Statistics {
 		
 		ArrayList<String> result = new ArrayList<String>();
 		
-		result.add("total links = "+links.count());
+		long totalLinks = links.count();
+		result.add("total links = "+totalLinks);
 	    result.add("total entities = "+totalEntities);
 	    result.add("total comparisons = "+comparisons);
-	    result.add("ratio = "+comparisons.longValue()/totalEntities*100+"%");
+	    result.add("totalLinks/comparisons = "+totalLinks/comparisons.longValue()*100+"%");
 	    
 	    ctx.parallelize(result).coalesce(1).saveAsTextFile(STATS_FILE);
 	    
