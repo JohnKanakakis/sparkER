@@ -88,8 +88,7 @@ public class Statistics {
 		
 		
 		
-		HDFSUtils.deleteHDFSFile(config.getAcceptanceFile());
-		HDFSUtils.deleteHDFSFile(config.getAcceptanceFile()+".ser");
+	
 		
 		/*
 		 * LIMES: creation of the execution plan

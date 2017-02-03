@@ -234,6 +234,9 @@ public class Linker {
         			maxTarget = target;
         		}
 			}
+			if(maxTarget == null){//just in case
+				continue;
+			}
 			if(maxSim >= thres){
 				tp = new Tuple2<String,Double>(DatasetManager.removeDatasetIdFromEntity(maxTarget),maxSim);
 				localLinks.add(new Tuple2<String,Tuple2<String,Double>>(DatasetManager.removeDatasetIdFromEntity(source),tp));

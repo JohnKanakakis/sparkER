@@ -207,12 +207,14 @@ public class DataFilter {
 				
 				Set<Tuple2<String, String>> poPairs = entity._2;
 				
+				logger.info("entity class filtering "+kb.getClassRestriction());
 				for(Tuple2<String, String> po : poPairs){
 					String property = po._1;
 					String object = po._2;
+					logger.info("entity class filtering "+property +" "+object);
 					if (property.equals(TYPE_PROPERTY)
 							&& object.equals(kb.getClassRestriction())) {
-						//logger.info("entity class filtering "+property +" "+object);
+						
 						return true;
 					}
 				}

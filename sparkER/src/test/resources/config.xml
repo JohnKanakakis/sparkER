@@ -47,7 +47,7 @@
 		<PROPERTY>rdfs:label AS lowercase->regexreplace("[^A-Za-z0-9]"," ") RENAME articleName</PROPERTY>
 		
 	</TARGET>
-	<METRIC>MAX ( AND(jaro(x.publicationName,y.articleName)|0.8 , ExactMatch(x.Year,y.Year)|1.0 ) , jaro(x.doi,y.doi)|0.95 ) </METRIC>
+	<METRIC>MAX ( AND(Jaccard(x.publicationName,y.articleName)|0.8 , ExactMatch(x.Year,y.Year)|1.0 ) , Jaccard(x.doi,y.doi)|0.95 ) </METRIC>
 	<ACCEPTANCE>
 		<THRESHOLD>0.8</THRESHOLD>
 		<FILE>/tmp/big-linkset/accepted_links_0.8_no_purge</FILE>
