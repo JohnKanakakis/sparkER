@@ -22,7 +22,7 @@
        	<groupId>org.aksw.limes.core</groupId>
 		<artifactId>limes-core</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
-        <scope> compile</scope>
+        <scope>compile</scope>
     </dependency>
 
 <!-- https://mvnrepository.com/artifact/commons-validator/commons-validator -->
