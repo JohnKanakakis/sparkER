@@ -170,6 +170,8 @@ public class Linker {
 	   	for(List<String> resourceInfo : block){
 	   	
 	    	subject = resourceInfo.get(0);
+	    	if(subject == null) continue;
+	    	
 	    	datasetId = DatasetManager.getDatasetIdOfEntity(subject);
 	    	if(datasetId.equals(sourceKb.getId())){
 	    		cache = sourceCache;
@@ -189,6 +191,10 @@ public class Linker {
 	    	for(int i = 1; i < resourceInfo.size()-1; i = i+2){
 	    		predicate = resourceInfo.get(i);
 	    		
+	    		if(predicate == null){
+	    			logger.error("predicate found null for subject "+subject);
+	    			continue;
+	    		}
 	    		if(kb.getProperties().contains(predicate)){
 	    			object = SparkUtils.eliminateDataTypeFromLiteral(resourceInfo.get(i+1));
 		    		if(kb.getFunctions().get(predicate).keySet().size() == 0){
@@ -222,6 +228,12 @@ public class Linker {
         	String maxTarget = "";
         	int loopCnt = 0;
 			for(String target: targets.keySet()){
+				
+				if(target == null){
+					logger.error("target found null");
+					continue;
+				}
+				
 				if(loopCnt == 0){
         			maxTarget = target;
         			maxSim = targets.get(target).doubleValue();
@@ -234,9 +246,9 @@ public class Linker {
         			maxTarget = target;
         		}
 			}
-			if(maxTarget == null){//just in case
+			/*if(maxTarget == null){//just in case
 				continue;
-			}
+			}*/
 			if(maxSim >= thres){
 				tp = new Tuple2<String,Double>(DatasetManager.removeDatasetIdFromEntity(maxTarget),maxSim);
 				localLinks.add(new Tuple2<String,Tuple2<String,Double>>(DatasetManager.removeDatasetIdFromEntity(source),tp));

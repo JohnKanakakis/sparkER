@@ -154,8 +154,8 @@ public class Statistics {
 
 
 		
-		records1 = DataFilter.applyAllPropertiesFilter(records1, skb,prefixIndex_B);
-		records2 = DataFilter.applyAllPropertiesFilter(records2, tkb,prefixIndex_B);
+		//records1 = DataFilter.applyAllPropertiesFilter(records1, skb,prefixIndex_B);
+		//records2 = DataFilter.applyAllPropertiesFilter(records2, tkb,prefixIndex_B);
 		
 		
 		
