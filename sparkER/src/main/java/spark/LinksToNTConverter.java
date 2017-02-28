@@ -11,6 +11,9 @@ public class LinksToNTConverter {
 
 	public static final String sameAsURI = "http://www.w3.org/2002/07/owl#sameAs";
 	
+	
+	
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
