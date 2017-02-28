@@ -12,7 +12,7 @@ import org.aksw.limes.core.execution.planning.plan.NestedPlan;
 import org.aksw.limes.core.io.cache.MemoryCache;
 import org.aksw.limes.core.io.config.Configuration;
 import org.aksw.limes.core.io.config.KBInfo;
-import org.aksw.limes.core.io.mapping.Mapping;
+import org.aksw.limes.core.io.mapping.Mapping; 
 import org.aksw.limes.core.io.preprocessing.Preprocessor;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.function.Function2;
