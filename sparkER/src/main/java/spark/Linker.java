@@ -39,10 +39,10 @@ public class Linker {
 
 	/**
 	 * @param <K>
-	 * @param blocks RDD in the form of (block_key, {[r_id1|info1], [r_id2|info2], ..., [r_idN|infoN]})
+	 * @param blocks RDD in the form of (token, {[e_id1|info1], [e_id2|info2], ..., [e_idN|infoN]})
 	 * @param planBinary_B : the broadcasted execution plan of LIMES
 	 * @param configBinary_B : the broadcasted configuration of LIMES
-	 * @return links RDD in the form of (source r_id, target r_id)
+	 * @return links RDD in the form of (source e_id, target e_id)
 	 */
 	public static <K> JavaPairRDD<String, String> run(final JavaPairRDD<K, Set<List<String>>> blocks, 
 			               			  final Broadcast<byte[]> planBinary_B,
@@ -54,29 +54,35 @@ public class Linker {
 		
 		
 		
+		//for each source Entity (key), the sequence function aggregates locally (on a single node) the
+		//current set of target tuples (<target entityID,simScore>) with a new target tuple
+		
 		Function2<Set<Tuple2<String,Double>>,Tuple2<String,Double>,Set<Tuple2<String,Double>>> seqFunc = 
 				new Function2<Set<Tuple2<String,Double>>,Tuple2<String,Double>,Set<Tuple2<String,Double>>>(){
 					private static final long serialVersionUID = 1L;
 					@Override
-					public Set<Tuple2<String,Double>> call(Set<Tuple2<String,Double>> resourceInfoSetPerKey, 
-							Tuple2<String,Double> resourceInfo) 
+					public Set<Tuple2<String,Double>> call(Set<Tuple2<String,Double>> targetWithSimTuplesSet, 
+							Tuple2<String,Double> targetWithSimTuple) 
 					throws Exception {
 						// TODO Auto-generated method stub
-						resourceInfoSetPerKey.add(resourceInfo);
-						return resourceInfoSetPerKey;
+						targetWithSimTuplesSet.add(targetWithSimTuple);
+						return targetWithSimTuplesSet;
 					}
 		};
 		
+		//for each source Entity (key), the combination function aggregates globally (from two or more nodes) the
+		//sets of target tuples (<target entityID,simScore>)
 		Function2<Set<Tuple2<String,Double>>,Set<Tuple2<String,Double>>,Set<Tuple2<String,Double>>> combFunc = 
+				
 				new Function2<Set<Tuple2<String,Double>>,Set<Tuple2<String,Double>>,Set<Tuple2<String,Double>>>(){
 					private static final long serialVersionUID = 1L;
 					@Override
-					public Set<Tuple2<String,Double>> call(Set<Tuple2<String,Double>> resourceInfoSetPerKey_1, 
-											Set<Tuple2<String,Double>> resourceInfoSetPerKey_2) 
+					public Set<Tuple2<String,Double>> call(Set<Tuple2<String,Double>> targetWithSimTuplesSet_1, 
+											Set<Tuple2<String,Double>> targetWithSimTuplesSet_2) 
 					throws Exception {
 						// TODO Auto-generated method stub
-						resourceInfoSetPerKey_1.addAll(resourceInfoSetPerKey_2);
-						return resourceInfoSetPerKey_1;
+						targetWithSimTuplesSet_1.addAll(targetWithSimTuplesSet_2);
+						return targetWithSimTuplesSet_1;
 					}
 		};
 		
@@ -107,6 +113,8 @@ public class Linker {
 		JavaPairRDD<String, String> links 
 		= blocks.mapPartitionsToPair(linkF)
 				.aggregateByKey(new HashSet<Tuple2<String,Double>>(), seqFunc, combFunc)
+				
+				//for each source, only the max similarity from all the targets is needed 
 				.mapToPair(new PairFunction<Tuple2<String,Set<Tuple2<String,Double>>>,String,String>(){
 					private static final long serialVersionUID = 1L;
 					@Override
@@ -127,6 +135,7 @@ public class Linker {
 	}
 
 
+	// LIMES is used here to link the entities of each block
 	private static List<Tuple2<String, Tuple2<String, Double>>> getLinksOfBlock(SimpleExecutionEngine engine, 
 																			    Configuration config, 
 																			    NestedPlan plan, 
@@ -143,12 +152,12 @@ public class Linker {
 		
 		int cnt1 = 0;
 		int cnt2 = 0;
-		String resourceId;
+		String entityId;
 		String datasetId;
-		for(List<String> resource : block){
-			resourceId = resource.get(0);
+		for(List<String> entityInfoList : block){
+			entityId = entityInfoList.get(0);
 			//resourcesRDD.lookup(resourceId);
-			datasetId = DatasetManager.getDatasetIdOfEntity(resourceId);
+			datasetId = DatasetManager.getDatasetIdOfEntity(entityId);
 		  	if(datasetId.equals(sourceKb.getId())){
 		  		cnt1++;
 		  	}else if(datasetId.equals(targetKb.getId())){
@@ -167,9 +176,9 @@ public class Linker {
 		String object = null;
 		String value;
 		
-	   	for(List<String> resourceInfo : block){
+	   	for(List<String> entityInfoList : block){
 	   	
-	    	subject = resourceInfo.get(0);
+	    	subject = entityInfoList.get(0);
 	    	if(subject == null) continue;
 	    	
 	    	datasetId = DatasetManager.getDatasetIdOfEntity(subject);
@@ -183,20 +192,20 @@ public class Linker {
 	    		
 	    	}
 	    	
-	    	if(resourceInfo.size()%2 == 0){
-	    		logger.error("malformed list "+resourceInfo);
+	    	if(entityInfoList.size()%2 == 0){
+	    		logger.error("malformed list "+entityInfoList);
 	    		return null;
 	    	}
 	    	
-	    	for(int i = 1; i < resourceInfo.size()-1; i = i+2){
-	    		predicate = resourceInfo.get(i);
+	    	for(int i = 1; i < entityInfoList.size()-1; i = i+2){
+	    		predicate = entityInfoList.get(i);
 	    		
 	    		if(predicate == null){
 	    			logger.error("predicate found null for subject "+subject);
 	    			continue;
 	    		}
 	    		if(kb.getProperties().contains(predicate)){
-	    			object = SparkUtils.eliminateDataTypeFromLiteral(resourceInfo.get(i+1));
+	    			object = SparkUtils.eliminateDataTypeFromLiteral(entityInfoList.get(i+1));
 		    		if(kb.getFunctions().get(predicate).keySet().size() == 0){
 		    			
 						cache.addTriple(subject, predicate, object);
@@ -218,7 +227,7 @@ public class Linker {
 
 		Mapping verificationMapping = engine.execute(plan);
 
-		Tuple2<String,Double> tp = null;
+		Tuple2<String,Double> targetWithSimTuple = null;
 		
 		HashMap<String, Double> targets;
 		for(String source: verificationMapping.getMap().keySet()){
@@ -250,8 +259,8 @@ public class Linker {
 				continue;
 			}*/
 			if(maxSim >= thres){
-				tp = new Tuple2<String,Double>(DatasetManager.removeDatasetIdFromEntity(maxTarget),maxSim);
-				localLinks.add(new Tuple2<String,Tuple2<String,Double>>(DatasetManager.removeDatasetIdFromEntity(source),tp));
+				targetWithSimTuple = new Tuple2<String,Double>(DatasetManager.removeDatasetIdFromEntity(maxTarget),maxSim);
+				localLinks.add(new Tuple2<String,Tuple2<String,Double>>(DatasetManager.removeDatasetIdFromEntity(source),targetWithSimTuple));
         	}
 		}
 	   	return localLinks;

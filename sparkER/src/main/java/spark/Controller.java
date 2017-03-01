@@ -56,10 +56,19 @@ public class Controller {
 	
 	public static void main(String[] args) {
 		
+		//xml configuration file
 		String LIMES_CONFIG_XML = args[0];
+		
+		//limes_dtd file for validation of .xml file
 		String LIMES_DTD = args[1];
+		
+		//purging
 		Boolean purging_enabled = Boolean.parseBoolean(args[2]);
+		
+		//stopwords file
 		String STOPWORDS_FILE = args[3];
+		
+		//filters only the entities with all properties of LIMES configuration 
 		boolean filter_all = Boolean.parseBoolean(args[4]);
 		
 		
@@ -79,7 +88,7 @@ public class Controller {
 		}
 		
 		
-		
+		//deleting previous links file
 		HDFSUtils.deleteHDFSFile(config.getAcceptanceFile());
 		HDFSUtils.deleteHDFSFile(config.getAcceptanceFile()+".ser");
 		
@@ -109,6 +118,7 @@ public class Controller {
 		ctx = new JavaSparkContext(sparkConf);
 		
 
+		//broadcasting of necessary java objects (plan and configuration) -> LIMES objects
 		Broadcast<byte[]> planBinary_B = ctx.broadcast(planBinary);
 		Broadcast<byte[]> configBinary_B = ctx.broadcast(configBinary);
 
@@ -156,7 +166,7 @@ public class Controller {
 		
 		
 
-		
+		//union of source and target entities to a single entitiesRDD
 		
 		JavaPairRDD<String, List<String>> entitiesRDD = 
 				entities1.union(entities2)
@@ -170,6 +180,8 @@ public class Controller {
 		/*
 		 * creation of token pairs in the form (token, r_id)
 		 */
+		
+		//broadcasting of stopwords file
 		final Broadcast<List<String>> stopwords = ctx.broadcast(ctx.textFile(STOPWORDS_FILE).collect());
 		
 		JavaPairRDD<String, String> tokenPairsRDD = 
@@ -201,14 +213,10 @@ public class Controller {
 			 */
 
 			final int optimalSize = BlockPurging.getOptimalBlockSize(blockSizesRDD);
-
 			
-
-
 			/*
 			 * blockSizes are purged 
 			 */
-			
 			
 			//filtering (token,N) , N < optimalSize
 			blockSizesRDD = blockSizesRDD.filter(new Function<Tuple2<String,Integer>,Boolean>(){
@@ -226,12 +234,16 @@ public class Controller {
 			/*
 			 * blockSizesRDD is locally collected and distributed as a HashSet
 			 */
+			
+			//localPurgedBlockKeysSet are the accepted tokens: the ones that have remained after the purging
 			HashSet<String> localPurgedBlockKeysSet = new HashSet<String>(blockSizesRDD.keys().collect());
 
 			final Broadcast<HashSet<String>> broadcastedPurgedBlockKeys = 
 					ctx.broadcast(localPurgedBlockKeysSet);
 
 
+			//filter tokenPairs with token in localPurgedBlockKeysSet
+			
 			tokenPairsRDD 
 			= tokenPairsRDD.filter(new Function<Tuple2<String,String>,Boolean>(){
 				private static final long serialVersionUID = 1L;

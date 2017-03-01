@@ -28,11 +28,11 @@ public class IndexCreator {
 	
 
 	/**
-	 * @param entitiesRDD : RDD in the form of (e_id, [info])
+	 * @param entitiesRDD : RDD in the form of (entityID, [info])
 	 * @param skbB : source KBInfo
 	 * @param tkbB : target KBInfo
 	 * @param stopwords 
-	 * @return tokenPairs in the form of (token, e_id)
+	 * @return tokenPairs in the form of (token, entityID)
 	 */
 	public static JavaPairRDD<String, String> getTokenPairs(JavaPairRDD<String,List<String>> entitiesRDD,
 																  final Broadcast<byte[]> skbB,
@@ -46,23 +46,23 @@ public class IndexCreator {
 		final Set<String> stopwords = new HashSet<String>(stopwords_B.getValue());
 		
 		
-		PairFlatMapFunction<Iterator<Tuple2<String, List<String>>>, String, String> f = 
+		// pair = (BKV, (valueOfProperty, entityID) )
+		PairFlatMapFunction<Tuple2<String, List<String>>, String, String> createTokenPairsFunction = 
 		
-		// pair = (BKV, (valueOfProperty, e_id) )		
-		new PairFlatMapFunction<Iterator<Tuple2<String,List<String>>>,String,String>(){
+		new PairFlatMapFunction<Tuple2<String,List<String>>,String,String>(){
 		
 			private static final long serialVersionUID = 1L;
 			
 			@Override
-			public Set<Tuple2<String, String>> call(Iterator<Tuple2<String, 
-													List<String>>> entities)
+			public Set<Tuple2<String, String>> call(Tuple2<String, 
+													List<String>> entity)
 			throws Exception {
 			
 				HashSet<Tuple2<String,String>> tokenPairs = 
 						new HashSet<Tuple2<String,String>>();
 				
 				Set<String> kbProperties = null;
-				Tuple2<String, List<String>> entity = null;
+				//Tuple2<String, List<String>> entity = null;
 				String e_id = null;
 				List<String> r_info = null;
 				String predicate = null;
@@ -72,55 +72,58 @@ public class IndexCreator {
 				String datasetId = "";
 				String[] tokens;
 				
-				while(entities.hasNext()){
-					entity = entities.next();
-					e_id = entity._1;
-					r_info = entity._2;
-					datasetId = DatasetManager.getDatasetIdOfEntity(e_id);
-					if(datasetId.equals(tkb.getId())){
-						kbProperties = targetProperties;
-					}else if(datasetId.equals(skb.getId())){
-						kbProperties = sourceProperties;
-					}
-					//clear BKV
-					BKV = "";
-					
-					
-					for(int i = 0; i < r_info.size()-1; i = i + 2){
-						predicate = r_info.get(i);
-					
-						if(kbProperties.contains(predicate)){
-							object = SparkUtils.eliminateDataTypeFromLiteral(r_info.get(i+1));
-							BKV+=(object.replace("\"", "")+" ");
-						}
-					}
-					tokens = BKV.toLowerCase().replaceAll("[^A-Za-z0-9 ]", " ").split(" ");
-					
-					for(int i = 0; i < tokens.length; i++){
-						tokens[i] = tokens[i].trim();
-						if(tokens[i].length() == 0) continue;
-						
-						
-						if(stopwords.contains(tokens[i])) continue;
-						
-						t = new Tuple2<String,String>(tokens[i],e_id);
-						tokenPairs.add(t);
-					}
-					
+				//while(entities.hasNext()){
+				//	entity = entities.next();
+				e_id = entity._1;
+				r_info = entity._2;
+				datasetId = DatasetManager.getDatasetIdOfEntity(e_id);
+				
+				//kbproperties are the LIMES properties of the source or the target specification, 
+				//depending on the datasetID of the entity
+				
+				if(datasetId.equals(tkb.getId())){
+					kbProperties = targetProperties;
+				}else if(datasetId.equals(skb.getId())){
+					kbProperties = sourceProperties;
 				}
+				
+				
+				for(int i = 0; i < r_info.size()-1; i = i + 2){
+					predicate = r_info.get(i);
+				
+					if(kbProperties.contains(predicate)){
+						object = SparkUtils.eliminateDataTypeFromLiteral(r_info.get(i+1));
+						BKV+=(object.replace("\"", "")+" ");
+					}
+				}
+				tokens = BKV.toLowerCase().replaceAll("[^A-Za-z0-9 ]", " ").split(" ");
+				
+				for(int i = 0; i < tokens.length; i++){
+					tokens[i] = tokens[i].trim();
+					if(tokens[i].length() == 0) continue;
+					
+					
+					if(stopwords.contains(tokens[i])) continue;
+					
+					t = new Tuple2<String,String>(tokens[i],e_id);
+					tokenPairs.add(t);
+				}
+					
+				//}
 				return tokenPairs;	
 			}
 		};
-		JavaPairRDD<String, String> result = entitiesRDD.mapPartitionsToPair(f);
-		return result;
+		
+		JavaPairRDD<String, String> tokenPairsRDD = entitiesRDD.flatMapToPair(createTokenPairsFunction);
+		return tokenPairsRDD;
 	}
 	
 	
 	
 
 	/**
-	 * @param tokenPairs RDD in the form of (block_key, e_id)
-	 * @return the entityIndex RDD in the form of (e_id, (block_key, e_id) )
+	 * @param tokenPairs RDD in the form of (block_key, entityID)
+	 * @return the entityIndex RDD in the form of (entityID, (block_key, entityID) )
 	 */
 	public static JavaPairRDD<String, Tuple2<String, String>> createIndex(JavaPairRDD<String, String> tokenPairs) {
 		JavaPairRDD<String, Tuple2<String, String>> index 

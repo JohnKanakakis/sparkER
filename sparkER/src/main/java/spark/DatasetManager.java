@@ -47,6 +47,7 @@ public class DatasetManager implements Serializable{
 		return invertedPrefixes;
 	}
 	
+	//shrinks the URI based on the prefixes Map
 	public static String shrinkURI(String uri,HashMap<String, String> prefixes) {
 			
 		String baseURI;
@@ -79,7 +80,7 @@ public class DatasetManager implements Serializable{
 		return prefix+":"+name;
 	}
 	
-	
+	//adds dataset id to the entity
 	public static String addDatasetIdToEntity(String entity, String datasetId){
 		
 		return entity+DATASET_STAMP+datasetId;
@@ -100,7 +101,11 @@ public class DatasetManager implements Serializable{
 	}
 
 
-
+	/* change of datatype and URI shrinking
+	 * 1) the input format is a RDD. Its records have the form of (entityURI, Set = {(property1,value1)...})
+	 * 2) the output format is a RDD. Its records have the form of (entityURI, List = [property1,value1,property2,value2,...])  
+	*/
+	
 	public static JavaPairRDD<String, List<String>> mapRecordsToEntities(JavaRDD<Tuple2<String, Set<Tuple2<String, String>>>> records,
 			                                                             final String datasetId, 
 			                                                             Broadcast<HashMap<String, String>> prefixIndex_B) 

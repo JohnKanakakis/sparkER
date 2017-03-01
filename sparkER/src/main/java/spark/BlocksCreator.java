@@ -26,46 +26,50 @@ public class BlocksCreator {
 	
 	
 	/**
-	 * creates blocks from the join of the resources RDD and the resourceIndex RDD
-	 * @param resourceIndex : (r_id,(block_key, r_id) )
-	 * @param resources : (r_id, [info])
-	 * @return blocks in the form of (block_key, { [r_id1|info1], [r_id2|info2], ..., [r_idN|infoN]})
+	 * creates blocks from the join of the entities RDD and the entityIndex RDD
+	 * @param entityIndex : (e_id,(token, e_id) )
+	 * @param entities : (e_id, [info])
+	 * @return blocks in the form of (token, { [e_id1|info1], [e_id2|info2], ..., [e_idN|infoN]})
 	 */
-	public static JavaPairRDD<String, Set<List<String>>> createBlocks( JavaPairRDD<String, Tuple2<String, String>> resourceIndex,
-																		    final JavaPairRDD<String, List<String>> resources) {
+	public static JavaPairRDD<String, Set<List<String>>> createBlocks( JavaPairRDD<String, Tuple2<String, String>> entityIndex,
+																		    final JavaPairRDD<String, List<String>> entities) {
 		
+		
+		//sequence function aggregates locally (at each node) the current list of entities per token (key)
+		//with a new entity
 		Function2<Set<List<String>>,List<String>,Set<List<String>>> seqFunc = 
 				new Function2<Set<List<String>>,List<String>,Set<List<String>>>(){
 					private static final long serialVersionUID = 1L;
 					@Override
-					public Set<List<String>> call(Set<List<String>> resourceInfoListPerKey, 
-							List<String> resourceInfo) 
+					public Set<List<String>> call(Set<List<String>> entityInfoListPerKey, 
+							List<String> entityInfo) 
 					throws Exception {
 						
-						resourceInfoListPerKey.add(resourceInfo);
-						return resourceInfoListPerKey;
+						entityInfoListPerKey.add(entityInfo);
+						return entityInfoListPerKey;
 					}
 		};
 		
+		//combination function merges two lists of entities per token (key) from two different nodes
 		Function2<Set<List<String>>,Set<List<String>>,Set<List<String>>> combFunc = 
 				new Function2<Set<List<String>>,Set<List<String>>,Set<List<String>>>(){
 					private static final long serialVersionUID = 1L;
 					@Override
-					public Set<List<String>> call(Set<List<String>> resourceInfoListPerKey_1, 
-											Set<List<String>> resourceInfoListPerKey_2) 
+					public Set<List<String>> call(Set<List<String>> entityInfoListPerKey_1, 
+											Set<List<String>> entityInfoListPerKey_2) 
 					throws Exception {
-						// TODO Auto-generated method stub
-						resourceInfoListPerKey_1.addAll(resourceInfoListPerKey_2);
-						return resourceInfoListPerKey_1;
+						
+						entityInfoListPerKey_1.addAll(entityInfoListPerKey_2);
+						return entityInfoListPerKey_1;
 					}
 		};
 		
-		/* (r_id, (block_key,r_id) ) join (r_id, [info])  =>
-		 * (r_id, ((block_key,r_id), [info]) ) =>
-		 * (block_key, [r_id|info])
+		/* (e_id, (token,e_id) ) join (e_id, [info])  =>
+		 * (e_id, ((token,e_id), [info]) ) =>
+		 * (token, [e_id|info])
 		 */
 		return 
-				resourceIndex.join(resources)
+				entityIndex.join(entities)
 					  .mapToPair(new PairFunction<Tuple2<String,Tuple2<Tuple2<String, String>,List<String>>>,String,List<String>>(){
 							private static final long serialVersionUID = 1L;
 					
@@ -73,20 +77,18 @@ public class BlocksCreator {
 							public Tuple2<String,List<String>> call(
 									Tuple2<String,Tuple2<Tuple2<String, String>, List<String>>> pair) throws Exception {
 								// TODO Auto-generated method stub
-								Tuple2<String, String> wordResourceId_pair = pair._2._1;
+								Tuple2<String, String> tokenResourceId_pair = pair._2._1;
 								
 								List<String> info = pair._2._2;
 								
-								String word = wordResourceId_pair._1;
-								
-								
-								
-								String r_id = wordResourceId_pair._2;
+								String token = tokenResourceId_pair._1;
+
+								String r_id = tokenResourceId_pair._2;
 								if(info.size()%2 != 0){
 								}else{
 									info.add(0, r_id);
 								}
-								return new Tuple2<String, List<String>>(word,info);
+								return new Tuple2<String, List<String>>(token,info);
 							}
 					  })
 					  .aggregateByKey(new HashSet<List<String>>(),seqFunc,combFunc);
