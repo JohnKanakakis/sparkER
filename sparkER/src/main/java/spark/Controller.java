@@ -274,6 +274,11 @@ public class Controller {
 		 * @param entities : (e_id, [info])
 		 * @return blocks in the form of (token, { [e_id1|info1], [e_id2|info2], ..., [e_idN|infoN]})
 		 */
+		
+		/* (e_id, (token,e_id) ) join (e_id, [info])  =>
+		 * (e_id, ((token,e_id), [info]) ) =>
+		 * (token, [e_id|info])
+		 */
 		/*
 		 * blocks RDD is created from the resourceIndex RDD and the resources RDD
 		 */
