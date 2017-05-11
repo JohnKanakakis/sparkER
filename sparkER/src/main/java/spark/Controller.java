@@ -256,6 +256,11 @@ public class Controller {
 			
 		}
 
+		
+		/**
+		 *  tokenPairs RDD in the form of (block_key, entityID)
+		 *  the resourceIndex RDD in the form of (entityID, (block_key, entityID) )
+		 */
 	
 		/*
 		 * resourceIndex RDD is created from the tokenPairs RDD
