@@ -268,7 +268,12 @@ public class Controller {
 		JavaPairRDD<String, Tuple2<String, String>> resourceIndex = IndexCreator.createIndex(tokenPairsRDD);
 
 		
-
+		/**
+		 * creates blocks from the join of the entities RDD and the resourceIndex RDD
+	 	 * @param resourceIndex : (e_id,(token, e_id) )
+		 * @param entities : (e_id, [info])
+		 * @return blocks in the form of (token, { [e_id1|info1], [e_id2|info2], ..., [e_idN|infoN]})
+		 */
 		/*
 		 * blocks RDD is created from the resourceIndex RDD and the resources RDD
 		 */
