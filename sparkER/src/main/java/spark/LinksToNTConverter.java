@@ -21,11 +21,14 @@ public class LinksToNTConverter {
 		String outputNTFile = args[1];
 		
 		
-		SparkConf sparkConf = new SparkConf().setAppName("LinksToNTConverter");
+		SparkConf sparkConf = new SparkConf().setAppName("LinksToNTConverter").setMaster("local[4]");
 		JavaSparkContext ctx = new JavaSparkContext(sparkConf);
-		
+
 		
 		JavaRDD<Tuple2<String, String>> links = ctx.objectFile(inputLinksSERFile);
+//		JavaRDD<String> links = ctx.textFile("file://"+inputLinksSERFile);
+
+//		System.out.println(links.toString());
 		
 		Function<Tuple2<String, String>, String> convertToNT = 
 				new Function<Tuple2<String, String>, String>(){

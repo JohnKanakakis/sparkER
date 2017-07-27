@@ -293,8 +293,29 @@ public class Controller {
 		links = Linker.run(blocks, planBinary_B, configBinary_B);
 		links.persist(StorageLevel.MEMORY_ONLY_SER()).setName("linksRDD");
 
-		links.saveAsTextFile(config.getAcceptanceFile());
+//		links.saveAsTextFile(config.getAcceptanceFile());
 		links.saveAsObjectFile(config.getAcceptanceFile()+".ser");
+		
+		Function<Tuple2<String, String>, String> convertToNT = 
+				new Function<Tuple2<String, String>, String>(){
+
+					private static final long serialVersionUID = 1L;
+					public static final String sameAsURI = "http://www.w3.org/2002/07/owl#sameAs";
+
+					@Override
+					public String call(Tuple2<String, String> linkPair)
+							throws Exception {
+						String sourceURI = linkPair._1;
+						String targetURI = linkPair._2;
+						
+						return 	"<"+sourceURI+">" + "\t" + 
+								"<"+sameAsURI+">" + "\t" +
+								"<"+targetURI+">" +	".\n";
+					}
+			
+		};
+		
+		links.map(convertToNT).saveAsTextFile(config.getAcceptanceFile());;
 		
 		ctx.close();
 	}
